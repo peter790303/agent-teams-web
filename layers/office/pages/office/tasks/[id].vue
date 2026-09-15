@@ -1,9 +1,46 @@
 <script setup lang="ts">
+/*********************************************
+ * 📂 Category: Imports
+ * 🔧 Defines: 引入必要的模組和庫
+ *********************************************/
 import { useOffice } from '~/layers/office/composables/useOffice'
+import type { TaskState } from '~/layers/office/types'
 
-// 📂 Category: page state and API view model
+/*********************************************
+ * 📂 Category: Page Meta
+ * 🔧 Defines: 以 definePageMeta() 宣告的頁面層級設定
+ *********************************************/
+useSeoMeta({ title: 'Office 工作詳情' })
+
+/*********************************************
+ * 📂 Category: Interface
+ * 🔧 Defines: 定義元件內使用的自訂 TypeScript 型別
+ *********************************************/
+type DispatchView = TaskState['data']['dispatches'][number]
+interface InterventionView { status?: string; editable?: boolean; role?: string; round?: number; branch?: string; worktree?: string; commit?: string; evidence?: unknown; diagnostics?: unknown; failedReviewRounds?: number; extraReviewRoundAllowance?: string }
+
+/*********************************************
+ * 📂 Category: Props / Emits
+ * 🔧 Defines: 定義元件接收的 props 或 emits 事件
+ *********************************************/
+
+/*********************************************
+ * 📂 Category: Composables / Plugins
+ * 🔧 Defines: 自定 composables、Pinia 狀態、i18n、plugin 等注入來源
+ *********************************************/
 const route = useRoute()
 const { getState, getIntervention, resumeTask, submitTask } = useOffice()
+
+/*********************************************
+ * 📂 Category: Static Data
+ * 🔧 Defines: 不會改變的靜態資料，例如選單、enum 對應等
+ *********************************************/
+const gateOptions = ['review', 'developmentQA', 'independentQA']
+
+/*********************************************
+ * 📂 Category: Refs / Reactive State
+ * 🔧 Defines: 元件中的 ref, reactive 等可變資料狀態
+ *********************************************/
 const state = ref<Awaited<ReturnType<typeof getState>> | null>(null)
 const intervention = ref<Awaited<ReturnType<typeof getIntervention>> | null>(null)
 const instruction = ref<string>('')
@@ -15,13 +52,21 @@ const extraReviewRoundAllowance = ref<string>('')
 const status = ref<string>('')
 const error = ref<string>('')
 const submitting = ref<boolean>(false)
-const submitKey = ref<string>(crypto.randomUUID())
+const submitKey = ref<string>('')
+const submitOperationSignature = ref<string | null>(null)
 const taskId = String(route.params.id)
-type DispatchView = Awaited<ReturnType<typeof getState>>['data']['dispatches'][number]
-interface InterventionView { status?: string; editable?: boolean; role?: string; round?: number; branch?: string; worktree?: string; commit?: string; evidence?: unknown; diagnostics?: unknown; failedReviewRounds?: number; extraReviewRoundAllowance?: string }
+
+/*********************************************
+ * 📂 Category: Provide / Inject
+ * 🔧 Defines: 提供給下層或自上層注入的值
+ *********************************************/
+
+/*********************************************
+ * 📂 Category: Computed
+ * 🔧 Defines: 定義計算屬性
+ *********************************************/
 const interventionData = computed<InterventionView | null>(() => intervention.value?.data === null || intervention.value?.data === undefined ? null : intervention.value.data as InterventionView)
 const interventionEditable = computed<boolean>(() => interventionData.value?.editable === true)
-const gateOptions = ['review', 'developmentQA', 'independentQA']
 const readableValue = (value: unknown): string => typeof value === 'string' ? value : typeof value === 'number' || typeof value === 'boolean' ? String(value) : value === null || value === undefined ? '未知' : JSON.stringify(value, null, 2)
 const qaRows = computed(() => state.value?.data.qaReport === null || state.value?.data.qaReport === undefined ? [] : Object.entries(state.value.data.qaReport).map(([label, value]) => ({ label, value: readableValue(value) })))
 const hasQaRows = computed<boolean>(() => qaRows.value.length > 0)
@@ -37,9 +82,47 @@ const summary = computed(() => state.value === null ? [] : [
   `Evidence：${state.value.data.executions.length} 筆`,
   `Environment：${state.value.data.workspace ? '已配置' : '尚未配置'}`,
 ])
-useSeoMeta({ title: 'Office 工作詳情' })
+
+/*********************************************
+ * 📂 Category: Watch
+ * 🔧 Defines: 監聽特定資料變化並執行對應邏輯
+ *********************************************/
+
+/*********************************************
+ * 📂 Category: Methods
+ * 🔧 Defines: 定義函數與事件處理
+ *********************************************/
+const errorMessage = (reason: unknown, fallback: string): string => reason instanceof Error ? reason.message : fallback
+const getSubmitKey = (): string => {
+  const signature = [taskId, worktree.value, commit.value, gate.value].join('|')
+  if (submitOperationSignature.value !== signature) {
+    submitOperationSignature.value = signature
+    submitKey.value = crypto.randomUUID()
+  }
+  return submitKey.value
+}
+const rotateSubmitKey = (): void => { submitOperationSignature.value = null; submitKey.value = '' }
+const resume = async (): Promise<void> => {
+  if (submitting.value) return
+  submitting.value = true
+  try { await resumeTask({ id: taskId, instruction: instruction.value, worktree: worktree.value, failedReviewRounds: failedReviewRounds.value, extraReviewRoundAllowance: extraReviewRoundAllowance.value }); status.value = '已送出接手指令'; state.value = await getState(taskId); intervention.value = await getIntervention(taskId); rotateSubmitKey() }
+  catch (reason) { error.value = errorMessage(reason, '接手指令送出失敗') }
+  finally { submitting.value = false }
+}
+const submit = async (): Promise<void> => {
+  if (submitting.value) return
+  submitting.value = true
+  try { await submitTask({ id: taskId, worktree: worktree.value, commit: commit.value, gate: gate.value, idempotencyKey: getSubmitKey() }); status.value = '已送出交付驗收'; rotateSubmitKey(); state.value = await getState(taskId); intervention.value = await getIntervention(taskId) }
+  catch (reason) { error.value = errorMessage(reason, '交付驗收送出失敗') }
+  finally { submitting.value = false }
+}
+
+/*********************************************
+ * 📂 Category: Lifecycle Hooks
+ * 🔧 Defines: Vue 生命週期 hook —— onMounted、onUnmounted 等
+ *********************************************/
 onMounted(async (): Promise<void> => {
-  try { state.value = await getState(taskId) } catch { error.value = '任務狀態載入失敗' }
+  try { state.value = await getState(taskId) } catch (reason) { error.value = errorMessage(reason, '任務狀態載入失敗') }
   try {
     intervention.value = await getIntervention(taskId)
     const data = intervention.value?.data as InterventionView | null | undefined
@@ -47,22 +130,8 @@ onMounted(async (): Promise<void> => {
     commit.value = data?.commit ?? ''
     failedReviewRounds.value = data?.round ?? 0
     extraReviewRoundAllowance.value = data?.extraReviewRoundAllowance ?? ''
-  } catch { error.value = '人工接手狀態載入失敗' }
+  } catch (reason) { error.value = errorMessage(reason, '人工接手狀態載入失敗') }
 })
-const resume = async (): Promise<void> => {
-  if (submitting.value) return
-  submitting.value = true
-  try { await resumeTask({ id: taskId, instruction: instruction.value, worktree: worktree.value, failedReviewRounds: failedReviewRounds.value, extraReviewRoundAllowance: extraReviewRoundAllowance.value }); status.value = '已送出接手指令'; state.value = await getState(taskId); intervention.value = await getIntervention(taskId) }
-  catch { error.value = '接手指令送出失敗' }
-  finally { submitting.value = false }
-}
-const submit = async (): Promise<void> => {
-  if (submitting.value) return
-  submitting.value = true
-  try { await submitTask({ id: taskId, worktree: worktree.value, commit: commit.value, gate: gate.value, idempotencyKey: submitKey.value }); status.value = '已送出交付驗收'; state.value = await getState(taskId); intervention.value = await getIntervention(taskId) }
-  catch { error.value = '交付驗收送出失敗' }
-  finally { submitting.value = false }
-}
 </script>
 
 <template>
