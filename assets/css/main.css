@@ -50,7 +50,3 @@ button { background: rgb(var(--v-theme-accent)); color: rgb(var(--v-theme-accent
 table { width: 100%; border-collapse: collapse; }
 td, th { padding: 10px; border-bottom: 1px solid rgb(var(--v-theme-border)); text-align: left; }
 .detail-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
-@media (max-width: 800px) {
-  .workspace, .detail-grid { grid-template-columns: 1fr; }
-  .map { min-height: 500px; }
-}
