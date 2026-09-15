@@ -32,19 +32,21 @@
     <div class="map-wrap">
       <div class="map">
         <div v-html="room()" />
-        <button
+        <v-btn
           v-for="person in people"
           :key="person.id"
           class="person"
           :style="person.style"
           :aria-label="person.ariaLabel"
+          variant="text"
+          density="compact"
           @click="selectRole(person.id)"
         >
           <span class="person-avatar" v-html="avatar(person.color, person.hairColor)" />
           <span class="person-label"
             >{{ person.name }}<small :class="{ 'is-running': person.running }">{{ person.status }}</small></span
           >
-        </button>
+        </v-btn>
       </div>
     </div>
     <div class="map-footer">

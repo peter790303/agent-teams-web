@@ -31,12 +31,14 @@
       ><span>{{ roles.length }} 個工作站</span>
     </div>
     <div class="employees">
-      <button
+      <v-btn
         v-for="person in employees"
         :key="person.id"
         class="employee"
         :class="{ 'is-active': person.active }"
         type="button"
+        variant="text"
+        density="compact"
         @click="selectRole(person.id)"
       >
         <span class="employee-avatar" v-html="person.avatarSvg" /><span
@@ -44,7 +46,7 @@
           ><small>{{ person.en }}</small
           ><span class="state">{{ person.statusText }}</span></span
         >
-      </button>
+      </v-btn>
     </div>
   </section>
 </template>
