@@ -511,16 +511,6 @@ button {
   font-weight: 700;
   cursor: pointer;
 }
-.task-list {
-  display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
-  margin-top: 14px;
-}
-.task-list a {
-  padding: 8px;
-  background: rgb(var(--v-theme-task-surface));
-}
 .roster {
   display: flex;
   gap: 10px;
@@ -591,12 +581,6 @@ th {
   border: 1px solid rgb(var(--v-theme-border));
   min-width: 0;
 }
-.command-center .panel-title {
-  border-bottom: 1px solid rgb(var(--v-theme-border));
-}
-.command-center .command-tabs {
-  border-bottom: 1px solid rgb(var(--v-theme-border));
-}
 .section-title {
   display: flex;
   justify-content: space-between;
@@ -605,21 +589,6 @@ th {
 .section-title a {
   font-size: 10px;
   color: rgb(var(--v-theme-text-muted));
-}
-.command-section ul {
-  margin: 10px 0 0;
-  padding: 0;
-  list-style: none;
-}
-.command-section li {
-  display: flex;
-  gap: 8px;
-  margin: 9px 0;
-  font-size: 11px;
-}
-.command-section time {
-  color: rgb(var(--v-theme-text-muted));
-  min-width: 19px;
 }
 .stat-grid {
   display: grid;
