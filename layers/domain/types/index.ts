@@ -9,11 +9,4 @@ export interface Task {
   updatedAt?: string
 }
 
-export interface ModelCandidate {
-  providerId: string
-  modelId: string
-  capabilities: string[]
-  qualityScore: number
-  costScore: number
-  latencyScore: number
-}
+export type { Model } from '../model/Model'
