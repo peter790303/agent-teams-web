@@ -1,25 +1,26 @@
 # Office 待驗收追蹤
 
-本次將既有工作目錄修改提交保存，不代表整體 UI 正式驗收通過，亦未整合進 master。
+所有程式修改已提交至 feature 分支；尚未整合進 master。以下 PASS 僅適用列明範圍，不代表整體 UI 或 Nuxt 移植正式驗收通過。
 
 ## 已有正式結果
 
-- model-settings：`c4bd1d5387c43acd8d09478a0ab317dd081384e4` → `eaa2fd9d1c7b33680d411c705186e3e02c16cea0`，兩檔收斂的 Standards / Spec 均 PASS，報告見同目錄。
-- 上述 PASS 不涵蓋 Office、其他頁面或整體 Nuxt 移植。
+- Model settings：`c4bd1d5387c43acd8d09478a0ab317dd081384e4` → `eaa2fd9d1c7b33680d411c705186e3e02c16cea0`，Standards / Spec 均 PASS。報告見同目錄 `model-settings-standards.md`、`model-settings-spec.md`。
+- Office 版面及任務統計：base `9a58b1d` → fixed head `d5d489d25a853d7bf55f1361bdac45400dcc9e1d`，Sol Standards / Spec 均 PASS。報告見同目錄 `office-layout-standards.md`、`office-layout-spec.md`。
+- 本包修正 Vuetify 欄位配置、computed 型別與 Category、空任務統計及載入狀態語意。
 
-## 本次保存的修改
+## 已完成的檢查
 
-- 補齊 AGENTS.md 規範入口、使用者提供的 ESLint / Prettier 設定。
-- assembler Category 區塊與 useOffice 陣列轉換整理。
-- 修正空任務清單統計、人物標籤字級及員工卡片溢出樣式。
-- 變更檔案 Prettier、ESLint、Nuxt typecheck 及 git diff --check 通過。
+- 變更檔案 Prettier、ESLint、Typecheck 及 diff check 通過。
+- Docker 建置與啟動成功，`http://localhost:30679/` 可開啟。部署版本為 `8399edb`；最終 `d5d489d` 僅校正 Category 註解文字，無執行期差異。
+- 實際桌面瀏覽器確認辦公室與 Command Center 同列，七張員工卡完整呈現且沒有溢出；空任務顯示零筆。
+- AGENTS 入口、使用者提供的 ESLint / Prettier 設定、既有 assembler 與 Office 修改均已提交保存。
 
 ## 尚須完成
 
-- 對照原 Nest 辦公室畫面，確認人物名稱、狀態辨識及員工列在桌面／窄版的呈現。
-- 複核任務 API 失敗與成功回傳空陣列是否能明確區分，失敗不得被當成零任務。
-- 整體 Category、Vuetify 優先使用、樣式及 template 表達式規範複核。
-- 對以上未完整驗收的修改執行固定 commit 的獨立 Standards / Spec review。
-- 完成後更新 Docker 執行版本並驗證核心操作流程。
+- 對照原 Nest 版本及需求圖片，驗收整體視覺與人物、狀態呈現；本包不代表完整視覺一致。
+- 實際窄版／行動版檢查。
+- API 失敗情境的執行期驗證；本包已完成程式層面的載入、空資料與錯誤狀態檢查。
+- 其他頁面與整體 Category、Vuetify、樣式、template 規範的完整複核。
+- 完整核心操作流程與 QA，依使用者指示保留待後續額度恢復驗收。
 
-`.scratch` 為本機工作暫存；正式 model-settings 報告已複製至本目錄保存。
+`.scratch/` 為本機暫存，不納入提交；正式報告已保存至本目錄。
