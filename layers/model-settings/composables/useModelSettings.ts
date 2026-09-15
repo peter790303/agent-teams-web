@@ -1,79 +1,44 @@
+/*********************************************
+ * 📂 Category: Imports
+ * 🔧 Defines: 引入模型設定流程所需模組
+ *********************************************/
+
 import { MODEL_ROLES } from '~/layers/domain/types'
 
 import { getCapacities, getCatalog, getHealth, getPolicy, savePolicy } from '../repositories'
-import type {
-  CandidateDraft,
-  Capacity,
-  HealthEntry,
-  ModelCandidate,
-  ModelCatalog,
-  ModelSettingsComposable,
-  PolicyEditor,
-  Role,
-} from '../types'
+import type { Capacity, HealthEntry, ModelCatalog, ModelSettingsComposable, ModelCandidate, PolicyEditor, Role } from '../types'
+import { useModelSettingsMappers } from '../utils/modelSettingsMappers'
 
 /*********************************************
- * 📂 Category: Interfaces
- * 🔧 Defines: 模型設定頁面的表單與載入狀態
+ * 📂 Category: Static Data
+ * 🔧 Defines: 模型設定頁面的固定資料
  *********************************************/
 
 const roles: readonly Role[] = MODEL_ROLES
-const blank = (): CandidateDraft => ({
-  providerId: '',
-  modelId: '',
-  capabilities: 'code',
-  qualityScore: '0',
-  costScore: '0',
-  latencyScore: '0',
-})
-const id = (model: Pick<ModelCandidate, 'providerId' | 'modelId'>): string => `${model.providerId}:${model.modelId}`
-const catalogId = (model: Pick<ModelCatalog, 'providerId' | 'modelId'>): string =>
-  `${model.providerId}:${model.modelId}`
-const candidateDraft = (candidate: ModelCandidate): CandidateDraft => ({
-  providerId: candidate.providerId,
-  modelId: candidate.modelId,
-  capabilities: candidate.capabilities.join(', '),
-  qualityScore: String(candidate.qualityScore),
-  costScore: String(candidate.costScore),
-  latencyScore: String(candidate.latencyScore),
-})
-const finiteNumber = (value: string, label: string): number => {
-  if (value.trim() === '') throw new Error(`${label} 必須是有限數字`)
-  const parsed = Number(value)
-  if (!Number.isFinite(parsed)) throw new Error(`${label} 必須是有限數字`)
-
-  return parsed
-}
-const fromDraft = (draft: CandidateDraft): ModelCandidate => {
-  const capabilities = draft.capabilities
-    .split(',')
-    .map((value) => value.trim())
-    .filter(Boolean)
-  if (!draft.providerId.trim() || !draft.modelId.trim()) throw new Error('Provider 與 Model 必須填寫')
-  if (capabilities.length === 0) throw new Error('至少填寫一項能力')
+const createEditor = (role: Role): PolicyEditor => {
+  const { blankDraft } = useModelSettingsMappers()
 
   return {
-    providerId: draft.providerId.trim(),
-    modelId: draft.modelId.trim(),
-    capabilities,
-    qualityScore: finiteNumber(draft.qualityScore, '品質分數'),
-    costScore: finiteNumber(draft.costScore, '成本分數'),
-    latencyScore: finiteNumber(draft.latencyScore, '延遲分數'),
+    role,
+    minQualityScore: '0',
+    version: 0,
+    updatedAt: '',
+    candidates: [],
+    selectedIds: [],
+    candidateDrafts: {},
+    draft: blankDraft(),
+    loadState: 'pending',
   }
 }
-const createEditor = (role: Role): PolicyEditor => ({
-  role,
-  minQualityScore: '0',
-  version: 0,
-  updatedAt: '',
-  candidates: [],
-  selectedIds: [],
-  candidateDrafts: {},
-  draft: blank(),
-  loadState: 'pending',
-})
 
 export const useModelSettings = (): ModelSettingsComposable => {
+  const { blankDraft, candidateDraft, fromDraft, finiteNumber, modelKey } = useModelSettingsMappers()
+
+  /*********************************************
+   * 📂 Category: Refs / Reactive State
+   * 🔧 Defines: 模型設定頁面的反應式狀態
+   *********************************************/
+
   const editors = ref<PolicyEditor[]>(roles.map(createEditor))
   const capacities = ref<Capacity[]>([])
   const health = ref<HealthEntry[]>([])
@@ -82,40 +47,59 @@ export const useModelSettings = (): ModelSettingsComposable => {
   const catalogError = ref('')
   const message = ref('')
   const error = ref('')
+
+  /*********************************************
+   * 📂 Category: Methods
+   * 🔧 Defines: 模型政策載入、編輯與儲存流程
+   *********************************************/
+
   const load = async (): Promise<void> => {
+    const policiesPromise = Promise.all(
+      roles.map(async (role) => {
+        try {
+          return { status: 'fulfilled' as const, value: await getPolicy({ role }) }
+        } catch {
+          return { status: 'rejected' as const }
+        }
+      })
+    )
     const [policies, catalogResult, capacityResult, healthResult] = await Promise.allSettled([
-      Promise.allSettled(roles.map((role) => getPolicy({ role }))),
+      policiesPromise,
       getCatalog(),
       getCapacities(),
       getHealth(),
     ])
-    if (policies.status === 'fulfilled')
-      policies.value.forEach((result, index) => {
-        const editor = editors.value[index]
+
+    if (policies.status === 'fulfilled') {
+      editors.value = policies.value.map((result, index) => {
+        const current = editors.value[index]
+        const editor: PolicyEditor = {
+          ...current,
+          candidateDrafts: { ...current.candidateDrafts },
+        }
         if (result.status === 'fulfilled') {
           const policy = result.value
           if (!policy) {
-            editor.loadState = 'missing'
-            editor.loadError = '尚未建立政策，可直接新增候選模型'
-
-            return
+            return { ...editor, loadState: 'missing', loadError: '尚未建立政策，可直接新增候選模型' }
           }
           const data = policy.data
-          editor.loadState = 'loaded'
-          editor.loadError = undefined
-          editor.minQualityScore = String(data.minQualityScore ?? 0)
-          editor.version = data.version
-          editor.updatedAt = data.updatedAt
-          editor.candidates = data.whitelist
-          editor.selectedIds = data.whitelist.map(id)
-          editor.candidateDrafts = Object.fromEntries(
-            data.whitelist.map((candidate) => [id(candidate), candidateDraft(candidate)])
-          )
-        } else {
-          editor.loadState = 'failed'
-          editor.loadError = '模型政策載入失敗，無法儲存，請稍後重試'
+
+          return {
+            ...editor,
+            loadState: 'loaded',
+            loadError: undefined,
+            minQualityScore: String(data.minQualityScore ?? 0),
+            version: data.version,
+            updatedAt: data.updatedAt,
+            candidates: data.whitelist,
+            selectedIds: data.whitelist.map(modelKey),
+            candidateDrafts: Object.fromEntries(data.whitelist.map((candidate) => [modelKey(candidate), candidateDraft(candidate)])),
+          }
         }
+
+        return { ...editor, loadState: 'failed', loadError: '模型政策載入失敗，無法儲存，請稍後重試' }
       })
+    }
     if (catalogResult.status === 'fulfilled') {
       catalog.value = catalogResult.value
       catalogState.value = 'loaded'
@@ -126,37 +110,40 @@ export const useModelSettings = (): ModelSettingsComposable => {
     }
     if (capacityResult.status === 'fulfilled') capacities.value = capacityResult.value
     if (healthResult.status === 'fulfilled') health.value = healthResult.value
-    if (capacityResult.status === 'rejected' || healthResult.status === 'rejected')
-      error.value = '部分監控資料暫時無法載入'
+    if (capacityResult.status === 'rejected' || healthResult.status === 'rejected') error.value = '部分監控資料暫時無法載入'
   }
+
   const addCandidate = (editor: PolicyEditor): void => {
     try {
       const candidate = fromDraft(editor.draft)
-      const candidateId = id(candidate)
-      if (!editor.candidates.some((item) => id(item) === candidateId)) {
+      const candidateId = modelKey(candidate)
+      if (!editor.candidates.some((item) => modelKey(item) === candidateId)) {
         editor.candidates.push(candidate)
         editor.candidateDrafts[candidateId] = candidateDraft(candidate)
         editor.selectedIds.push(candidateId)
       }
-      editor.draft = blank()
+      editor.draft = blankDraft()
       editor.validationError = undefined
     } catch (reason) {
       editor.validationError = reason instanceof Error ? reason.message : '候選模型資料無效'
     }
   }
-  const selectCatalogModel = (editor: PolicyEditor, modelKey: string): void => {
-    const model = catalog.value.find((entry: ModelCatalog) => catalogId(entry) === modelKey)
+
+  const selectCatalogModel = (editor: PolicyEditor, selectedKey: string): void => {
+    const model = catalog.value.find((entry: ModelCatalog) => modelKey(entry) === selectedKey)
     if (model) {
       editor.draft.providerId = model.providerId
       editor.draft.modelId = model.modelId
     }
   }
+
   const toggle = (editor: PolicyEditor, candidate: ModelCandidate): void => {
-    const candidateId = id(candidate)
+    const candidateId = modelKey(candidate)
     const index = editor.selectedIds.indexOf(candidateId)
     if (index >= 0) editor.selectedIds.splice(index, 1)
     else editor.selectedIds.push(candidateId)
   }
+
   const save = async (editor: PolicyEditor): Promise<void> => {
     if (editor.loadState !== 'loaded' && editor.loadState !== 'missing') {
       editor.validationError = '政策尚未完成載入，無法儲存'
@@ -165,12 +152,12 @@ export const useModelSettings = (): ModelSettingsComposable => {
     }
     try {
       const candidates = editor.candidates.map((candidate) =>
-        fromDraft(editor.candidateDrafts[id(candidate)] ?? candidateDraft(candidate))
+        fromDraft(editor.candidateDrafts[modelKey(candidate)] ?? candidateDraft(candidate))
       )
       const selectedIds = new Set(editor.selectedIds)
       await savePolicy({
         role: editor.role,
-        whitelist: candidates.filter((candidate) => selectedIds.has(id(candidate))),
+        whitelist: candidates.filter((candidate) => selectedIds.has(modelKey(candidate))),
         minQualityScore: finiteNumber(editor.minQualityScore, '最低品質分數'),
       })
       editor.validationError = undefined
@@ -196,7 +183,7 @@ export const useModelSettings = (): ModelSettingsComposable => {
     selectCatalogModel,
     toggle,
     save,
-    id,
-    catalogId,
+    id: modelKey,
+    catalogId: modelKey,
   }
 }
