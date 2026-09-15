@@ -1,29 +1,13 @@
 <script setup lang="ts">
-/*********************************************
- * 📂 Category: Interface
- * 🔧 Defines: 定義元件內使用的自訂 TypeScript 型別
- *********************************************/
-interface Person { name: string; role: string }
-
-/*********************************************
- * 📂 Category: Props / Emits
- * 🔧 Defines: 定義元件接收的 props 或 emits 事件
- *********************************************/
+import { avatar, roles } from '~/layers/office/assets/originalOffice'
 const props = defineProps<{ roleStatuses: Record<string, string> }>()
-
-/*********************************************
- * 📂 Category: Static Data
- * 🔧 Defines: 不會改變的靜態資料，例如選單、enum 對應等
- *********************************************/
-const people: Person[] = [
-  { name: 'AI 主控', role: 'leader' }, { name: 'PM', role: 'pm' },
-  { name: 'RD Leader', role: 'rd_leader' }, { name: 'RD', role: 'rd' }, { name: 'QA', role: 'qa' },
-]
-
-/*********************************************
- * 📂 Category: Computed
- * 🔧 Defines: 定義計算屬性
- *********************************************/
-const peopleWithStatus = computed(() => people.map((person) => ({ ...person, status: props.roleStatuses[person.role] ?? '尚無資料', active: /running|執行中|active/i.test(props.roleStatuses[person.role] ?? '') })))
+const status = (value?: string): string => !value ? '● 待命' : /running|執行中|active/i.test(value) ? '● 工作中' : /pending|等待|queued/i.test(value) ? '● 等待中' : `● ${value}`
+const running = (value?: string): boolean => Boolean(value && /running|執行中|active/i.test(value))
 </script>
-<template><footer class="roster"><div v-for="person in peopleWithStatus" :key="person.role" class="employee-card" :class="{ 'is-active': person.active }"><div class="employee-avatar"><span class="avatar-hair" /><span class="avatar-face" /></div><div><strong>{{ person.name }}</strong><small>{{ person.role }}</small><em>{{ person.status }}</em><i v-if="person.active" /></div></div><button class="add-employee" type="button" aria-label="新增員工" title="新增員工功能尚未提供" disabled>＋</button></footer></template>
+<template>
+  <section class="roster" aria-label="團隊工作站"><div class="roster-title"><span>團隊工作站 <span style="color:#61745c">／ TEAM STATIONS</span></span><span>{{ roles.length }} 個工作站</span></div><div class="employees">
+    <button v-for="person in roles" :key="person.id" class="employee" :class="{ 'is-active': running(props.roleStatuses[person.id]) }" type="button">
+      <span class="employee-avatar" v-html="avatar(person.color, person.id === 'pm' || person.id === 'qa' ? '#624633' : '#383630')" /><span><strong>{{ person.name }}</strong><small>{{ person.en }}</small><span class="state">{{ status(props.roleStatuses[person.id]) }}</span></span>
+    </button>
+  </div></section>
+</template>
