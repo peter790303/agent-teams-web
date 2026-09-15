@@ -11,7 +11,9 @@ import type { SavePolicyPayload } from '../types/api'
  * 🔧 Defines: 定義函數與事件處理
  *********************************************/
 
-export const toPolicyPayload = (whitelist: ModelCandidate[], minQualityScore: number): SavePolicyPayload => ({
+const toPolicyPayload = (whitelist: ModelCandidate[], minQualityScore: number): SavePolicyPayload => ({
   minQualityScore,
   whitelist,
 })
+
+export const useModelSettingsMappers = (): { toPolicyPayload: typeof toPolicyPayload } => ({ toPolicyPayload })

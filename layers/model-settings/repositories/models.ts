@@ -5,7 +5,7 @@
 
 import { request } from '~/layers/base/repositories/http'
 import type { Model as ModelCandidate } from '~/layers/domain/model/Model'
-import { toCapacity, toHealth, toPolicy } from '~/layers/domain/model-settings/assemblers/modelSettings.assembler'
+import { useModelSettingsAssemblers } from '~/layers/domain/model-settings/assemblers/modelSettingsAssemblers'
 import type {
   CapacityResource,
   HealthResource,
@@ -15,7 +15,7 @@ import type {
 import { MODEL_ROLES, type Role } from '~/layers/domain/types'
 
 import type { Capacity, HealthEntry, ModelCatalog, Policy } from '../types'
-import { toPolicyPayload } from '../utils/modelSettingsMappers'
+import { useModelSettingsMappers } from '../utils/modelSettingsMappers'
 
 /*********************************************
  * 📂 Category: Interface
@@ -25,6 +25,9 @@ import { toPolicyPayload } from '../utils/modelSettingsMappers'
 export interface GetPolicyInput {
   role: Role
 }
+
+const { toCapacity, toHealth, toPolicy } = useModelSettingsAssemblers()
+const { toPolicyPayload } = useModelSettingsMappers()
 
 /*********************************************
  * 📂 Category: Methods
