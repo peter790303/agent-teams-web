@@ -5,6 +5,13 @@
    *********************************************/
   import type { Task } from '~/layers/office/types'
 
+  type CommandStats = {
+    completed: number
+    waiting: number
+    failed: number
+    running: number
+  }
+
   /*********************************************
    * 📂 Category: Props / Emits
    * 🔧 Defines: 指揮中心資料輸入
@@ -20,19 +27,24 @@
    * 🔧 Defines: 目前指揮中心分頁
    *********************************************/
   const tab = ref<'overview' | 'tasks' | 'activity' | 'settings'>('overview')
-  const stats = computed(() => ({
+
+  /*********************************************
+   * 📂 Category: Computed
+   * 🔧 Defines: 指揮中心的統計與動態資料
+   *********************************************/
+  const stats = computed<CommandStats>(() => ({
     completed: props.tasks.filter((task) => /completed|succeeded|完成/i.test(task.stage)).length,
     waiting: props.tasks.filter((task) => /pending|等待|queued/i.test(task.stage)).length,
     failed: props.tasks.filter((task) => /failed|失敗|error/i.test(task.stage)).length,
     running: props.tasks.filter((task) => /running|active|執行中/i.test(task.stage)).length,
   }))
-  const pendingTasks = computed(() => props.tasks.filter((task) => /pending|等待|queued/i.test(task.stage)))
-  const feed = computed(() =>
+  const pendingTasks = computed<Task[]>(() => props.tasks.filter((task) => /pending|等待|queued/i.test(task.stage)))
+  const feed = computed<string[]>(() =>
     props.activities.length
       ? props.activities
       : props.tasks.slice(0, 5).map((task) => `${task.purpose} · ${task.stage}`)
   )
-  const statsLabel = computed(() => {
+  const statsLabel = computed<string | null>(() => {
     if (props.taskLoadStatus === 'success') return null
     if (props.taskLoadStatus === 'loading' || props.taskLoadStatus === 'idle') return '載入中…'
 
