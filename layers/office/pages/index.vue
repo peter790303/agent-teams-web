@@ -8,6 +8,7 @@ import CommandCenter from '~/layers/office/components/office/CommandCenter.vue'
 import PixelOfficeMap from '~/layers/office/components/office/PixelOfficeMap.vue'
 import WorkstationRoster from '~/layers/office/components/office/WorkstationRoster.vue'
 import { useDisplay } from 'vuetify'
+import { roles } from '~/layers/office/assets/originalOffice'
 
 /*********************************************
  * 📂 Category: Page Meta  (Nuxt only)
@@ -28,12 +29,18 @@ const { mdAndDown } = useDisplay()
  *********************************************/
 const purpose = ref<string>('')
 const projectId = ref<string>('default')
+const selectedRoleId = ref<string | null>(null)
+const selectedRole = computed(() => roles.find((role) => role.id === selectedRoleId.value))
+const roleDescriptions: Record<string, string> = {
+  leader: '協調需求與團隊分工。', pm: '整理需求並建立 Spec。', rd_leader: '建立開發 Plan，協調 RD 與審查。',
+  rd: '依照 Plan 執行開發工作。', review: '核對規範與需求，檢查受審版本。', qa: '驗證成果並保存 QA 報告。', delivery: '呈現交付分支、驗收與環境清理狀態。',
+}
 
 /*********************************************
  * 📂 Category: Computed
  * 🔧 Defines: 定義計算屬性
  *********************************************/
-const systemStatus = computed(() => Object.keys(roleStatuses.value).length > 0 ? '正常運行中' : '資料未提供')
+const systemStatus = computed(() => error.value ? '連線失敗' : '正常運行中')
 const taskLinks = computed(() => tasks.value.map((task) => ({ ...task, href: `/office/tasks/${task.id}` })))
 const activities = computed(() => taskStates.value.map((state) => state.data.activity).filter((item): item is string => Boolean(item?.trim())).slice(0, 5))
 const now = ref(new Date())
@@ -53,6 +60,11 @@ const submit = async (): Promise<void> => {
     // useOffice stores the API error for the alert below.
   }
 }
+const openRole = (id: string): void => {
+  selectedRoleId.value = id
+}
+const roleState = computed(() => roleStatuses.value[selectedRoleId.value ?? ''] ?? '待命')
+const roleTaskText = computed(() => tasks.value.length ? `目前共有 ${tasks.value.length} 筆任務，角色狀態：${roleState.value}。` : '尚未選取任務，角色目前待命。')
 
 /*********************************************
  * 📂 Category: Lifecycle Hooks
@@ -68,9 +80,9 @@ onUnmounted(() => { if (clockTimer) clearInterval(clockTimer) })
 <template>
   <BasePageLayout>
     <main class="shell">
-      <header class="office-header"><div class="brand"><span class="brand-mark">▦</span><div><h1>AI OFFICE <small>v0.1.0</small></h1><p>智能協作指揮中心</p></div></div><div class="header-meta"><span class="clock">☀ {{ clockText }} <small>{{ dateText }}</small></span><span class="health" :class="{ 'is-unknown': systemStatus === '資料未提供' }"><i /> 系統狀態：{{ systemStatus }}</span><span class="supervisor"><b>AI</b> 主控模式</span></div></header>
+      <header class="office-header"><div class="brand"><span class="brand-mark">▦</span><div><h1>AI OFFICE <small>v0.1.0</small></h1><p>智能協作指揮中心</p></div></div><div class="header-meta"><span class="clock">☀ {{ clockText }} <small>{{ dateText }}</small></span><span class="health" :class="{ 'is-unknown': systemStatus === '連線失敗' }"><i /> 系統狀態：{{ systemStatus }}</span><span class="supervisor"><b>AI</b> 主控模式</span></div></header>
       <v-row class="workspace" :class="{ 'is-narrow': mdAndDown }">
-        <v-col cols="12" md="8"><PixelOfficeMap :role-statuses="roleStatuses" /></v-col>
+        <v-col cols="12" md="8"><PixelOfficeMap :role-statuses="roleStatuses" @role="openRole" /></v-col>
         <v-col cols="12" md="4"><CommandCenter :tasks="tasks" :activities="activities" /></v-col>
       </v-row>
       <v-row>
@@ -82,7 +94,13 @@ onUnmounted(() => { if (clockTimer) clearInterval(clockTimer) })
           </section>
         </v-col>
       </v-row>
-      <v-row><v-col cols="12"><WorkstationRoster :role-statuses="roleStatuses" /></v-col></v-row>
+      <v-row><v-col cols="12"><WorkstationRoster :role-statuses="roleStatuses" @role="openRole" /></v-col></v-row>
     </main>
+    <dialog v-if="selectedRole" open class="role-dialog" @click.self="selectedRoleId = null">
+      <h2>{{ selectedRole.name }} <small>{{ selectedRole.en }}</small></h2>
+      <p>{{ roleDescriptions[selectedRole.id] }}</p>
+      <p class="role-status">{{ roleTaskText }}</p>
+      <div class="dialog-actions"><button type="button" @click="selectedRoleId = null">關閉</button><NuxtLink to="/settings/models">設定角色模型</NuxtLink></div>
+    </dialog>
   </BasePageLayout>
 </template>

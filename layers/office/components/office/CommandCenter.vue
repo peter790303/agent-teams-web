@@ -20,7 +20,7 @@ const feed = computed(() => props.activities.length ? props.activities : props.t
     </nav>
     <template v-if="tab === 'overview'">
       <section class="command-section"><div class="heading-row"><h2>即時動態</h2><button class="soft-link" @click="tab = 'activity'">查看全部 →</button></div><div class="feed"><div v-for="(item,index) in feed" :key="`${item}-${index}`" class="event"><time>—</time><p>{{ item }}</p></div><div v-if="!feed.length" class="empty"><strong>今天，從一個想法開始</strong><span>團隊已就位，等待你的第一項工作。</span></div></div></section>
-      <section class="command-section"><h2>今日統計</h2><div class="stat-grid"><div><strong>{{ stats.completed || '—' }}</strong><small>完成任務</small></div><div><strong>{{ stats.waiting || '—' }}</strong><small>等待處理</small></div><div><strong>—</strong><small>錯誤</small></div><div><strong>{{ stats.running || '—' }}</strong><small>運行中</small></div></div></section>
+      <section class="command-section"><h2>今日統計</h2><div class="stat-grid"><div><strong>{{ stats.completed }}</strong><small>完成任務</small></div><div><strong>{{ stats.waiting }}</strong><small>等待處理</small></div><div><strong>—</strong><small>錯誤</small></div><div><strong>{{ stats.running }}</strong><small>運行中</small></div></div></section>
       <section class="command-section"><h2>系統資源</h2><p class="notice">目前 API 未提供即時資源數值</p></section>
     </template>
     <section v-else-if="tab === 'activity'" class="command-section"><div class="heading-row"><h2>全部動態</h2><button class="soft-link" @click="tab = 'overview'">返回總覽</button></div><div class="feed"><div v-for="(item,index) in feed" :key="`${item}-${index}`" class="event"><time>—</time><p>{{ item }}</p></div></div></section>
