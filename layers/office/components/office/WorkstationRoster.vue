@@ -1,8 +1,16 @@
 <script setup lang="ts">
+  /*********************************************
+   * 📂 Category: Imports
+   * 🔧 Defines: 引入角色與 SVG 資產
+   *********************************************/
   import { computed } from 'vue'
 
   import { avatar, roles } from '~/layers/office/assets/originalOffice'
 
+  /*********************************************
+   * 📂 Category: Props / Emits
+   * 🔧 Defines: 角色狀態輸入與選取事件
+   *********************************************/
   const props = defineProps<{ roleStatuses: Record<string, string> }>()
   const emit = defineEmits<{ role: [id: string] }>()
   const status = (value?: string): string =>
@@ -27,7 +35,7 @@
 <template>
   <section class="roster" aria-label="團隊工作站">
     <div class="roster-title">
-      <span>團隊工作站 <span style="color: #61745c">／ TEAM STATIONS</span></span
+      <span>團隊工作站 <span class="text-medium-emphasis">／ TEAM STATIONS</span></span
       ><span>{{ roles.length }} 個工作站</span>
     </div>
     <div class="employees">

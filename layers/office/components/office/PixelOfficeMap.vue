@@ -1,8 +1,16 @@
 <script setup lang="ts">
+  /*********************************************
+   * 📂 Category: Imports
+   * 🔧 Defines: 引入角色與辦公室 SVG 資產
+   *********************************************/
   import { computed } from 'vue'
 
   import { avatar, roles, room } from '~/layers/office/assets/originalOffice'
 
+  /*********************************************
+   * 📂 Category: Props / Emits
+   * 🔧 Defines: 角色狀態輸入與選取事件
+   *********************************************/
   const props = defineProps<{ roleStatuses: Record<string, string> }>()
   const emit = defineEmits<{ role: [id: string] }>()
   const statusLabel = (value?: string): string => {

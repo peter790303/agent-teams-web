@@ -1,7 +1,21 @@
 <script setup lang="ts">
+  /*********************************************
+   * 📂 Category: Imports
+   * 🔧 Defines: 引入任務型別
+   *********************************************/
   import type { Task } from '~/layers/office/types'
+
+  /*********************************************
+   * 📂 Category: Props / Emits
+   * 🔧 Defines: 指揮中心資料輸入
+   *********************************************/
   const props = defineProps<{ tasks: Task[]; activities: string[] }>()
-  const tab = ref<'overview' | 'tasks' | 'activity'>('overview')
+
+  /*********************************************
+   * 📂 Category: Refs / Reactive State
+   * 🔧 Defines: 目前指揮中心分頁
+   *********************************************/
+  const tab = ref<'overview' | 'tasks' | 'activity' | 'settings'>('overview')
   const stats = computed(() => ({
     completed: props.tasks.filter((task) => /completed|succeeded|完成/i.test(task.stage)).length,
     waiting: props.tasks.filter((task) => /pending|等待|queued/i.test(task.stage)).length,
@@ -16,12 +30,12 @@
 <template>
   <aside class="panel command-center" aria-label="Command Center">
     <h2 class="panel-title">COMMAND CENTER</h2>
-    <nav class="tabs command-tabs" aria-label="指揮中心分頁">
-      <v-btn variant="text" :aria-selected="tab === 'overview'" @click="tab = 'overview'"><b>◈</b>總覽</v-btn>
-      <v-btn variant="text" :aria-selected="tab === 'tasks'" @click="tab = 'tasks'"><b>✓</b>任務</v-btn>
-      <v-btn variant="text" :aria-selected="tab === 'activity'" @click="tab = 'activity'"><b>▣</b>動態</v-btn>
-      <NuxtLink to="/settings/models"><b>⚙</b>設定</NuxtLink>
-    </nav>
+    <v-tabs v-model="tab" class="command-tabs" aria-label="指揮中心分頁" color="warning" bg-color="transparent" grow>
+      <v-tab value="overview">◈ 總覽</v-tab>
+      <v-tab value="tasks">✓ 任務</v-tab>
+      <v-tab value="activity">▣ 動態</v-tab>
+      <v-tab value="settings" to="/settings/models">⚙ 設定</v-tab>
+    </v-tabs>
     <template v-if="tab === 'overview'">
       <section class="command-section">
         <div class="heading-row">

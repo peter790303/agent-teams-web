@@ -116,7 +116,7 @@
           <span class="brand-mark">▦</span>
           <div>
             <h1>AI OFFICE <small>v0.1.0</small></h1>
-            <p>智能協作指揮中心</p>
+            <p class="ma-0 mt-1 text-caption text-medium-emphasis">智能協作指揮中心</p>
           </div>
         </div>
         <div class="header-meta">

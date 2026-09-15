@@ -3,6 +3,11 @@ import { MODEL_ROLES } from '~/layers/domain/types'
 import { getCapacities, getCatalog, getHealth, getPolicy, savePolicy } from '../repositories'
 import type { Capacity, HealthEntry, ModelCandidate, ModelCatalog, Role } from '../types'
 
+/*********************************************
+ * 📂 Category: Interfaces
+ * 🔧 Defines: 模型設定頁面的表單與載入狀態
+ *********************************************/
+
 export interface CandidateDraft {
   providerId: string
   modelId: string

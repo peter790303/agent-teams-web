@@ -4,6 +4,7 @@
    * 🔧 Defines: 引入必要的模組和庫
    *********************************************/
   import { useModelSettings } from '~/layers/model-settings/composables/useModelSettings'
+  import type { HealthEntry } from '~/layers/model-settings/types'
 
   /*********************************************
    * 📂 Category: Page Meta  (Nuxt only)
@@ -35,6 +36,22 @@
   } = useModelSettings()
 
   /*********************************************
+   * 📂 Category: Computed
+   * 🔧 Defines: 提供模板使用的顯示資料
+   *********************************************/
+  const candidateLabel = (candidate: { providerId: string; modelId: string }): string =>
+    `${candidate.providerId}/${candidate.modelId}`
+  const healthRows = computed(() =>
+    health.value.map((entry: HealthEntry) => ({
+      ...entry,
+      affectedModelsText: entry.affectedModels.join(', ') || '—',
+      quotaText: `${entry.quota.status} ${entry.quota.amount ?? '—'} ${entry.quota.unit ?? ''}`.trim(),
+      estimatedReasonText: entry.quota.isEstimated ? entry.quota.estimatedReason : '',
+      freshnessText: entry.isStale ? '過期' : '新鮮',
+    }))
+  )
+
+  /*********************************************
    * 📂 Category: Lifecycle Hooks
    * 🔧 Defines: Vue 生命週期 hook —— onMounted、onUnmounted 等
    *********************************************/
@@ -45,7 +62,6 @@
     <main class="panel-page">
       <NuxtLink to="/">← 返回 AI Office</NuxtLink>
       <h1>模型設定與監控</h1>
-      Ｆ
       <p>管理角色白名單、候選模型能力、評分、容量與 Provider 健康狀態。</p>
       <v-row>
         <v-col v-for="editor in editors" :key="editor.role" cols="12" md="6">
@@ -66,7 +82,7 @@
               <li v-for="candidate in editor.candidates" :key="id(candidate)">
                 <v-checkbox
                   :model-value="editor.selectedIds.includes(id(candidate))"
-                  :label="`${candidate.providerId}/${candidate.modelId}`"
+                  :label="candidateLabel(candidate)"
                   @update:model-value="toggle(editor, candidate)"
                 />
                 <v-text-field v-model="editor.candidateDrafts[id(candidate)].capabilities" label="能力" />
@@ -125,15 +141,15 @@
             <h2>Provider 健康</h2>
             <table>
               <tbody>
-                <tr v-for="entry in health" :key="entry.providerId">
+                <tr v-for="entry in healthRows" :key="entry.providerId">
                   <td>{{ entry.providerId }}</td>
                   <td>{{ entry.sourceGranularity }}</td>
                   <td>{{ entry.authStatus }}</td>
                   <td>{{ entry.callHealth }}</td>
-                  <td>{{ entry.affectedModels.join(', ') || '—' }}</td>
-                  <td>{{ entry.quota.status }} {{ entry.quota.amount ?? '—' }} {{ entry.quota.unit ?? '' }}</td>
-                  <td>{{ entry.quota.isEstimated ? entry.quota.estimatedReason : '' }}</td>
-                  <td>{{ entry.isStale ? '過期' : '新鮮' }} · {{ entry.observedAt }}</td>
+                  <td>{{ entry.affectedModelsText }}</td>
+                  <td>{{ entry.quotaText }}</td>
+                  <td>{{ entry.estimatedReasonText }}</td>
+                  <td>{{ entry.freshnessText }} · {{ entry.observedAt }}</td>
                 </tr>
               </tbody>
             </table>
