@@ -6,29 +6,17 @@
   import { computed } from 'vue'
 
   import { avatar, roles } from '~/layers/office/assets/originalOffice'
+  import { getRoleStatusInfo } from '~/layers/office/utils/dispatchStatus'
 
   /*********************************************
-   * 📂 Category: Props
-   * 🔧 Defines: 角色狀態輸入與選取回呼
+   * 📂 Category: Props / Emits
+   * 🔧 Defines: 定義元件接收的 props 或 emits 事件
    *********************************************/
   const props = defineProps<{ roleStatuses: Record<string, string>; onRole: (id: string) => void }>()
-  const statusInfo = (value?: string): { text: string; icon: string; className: string; running: boolean } => {
-    if (!value) return { text: '資料未提供', icon: '?', className: 'is-unknown', running: false }
-    if (/running|執行中|active/i.test(value))
-      return { text: '工作中', icon: '●', className: 'is-running', running: true }
-    if (/pending|等待|queued/i.test(value))
-      return { text: '等待中', icon: '◷', className: 'is-waiting', running: false }
-    if (/completed|succeeded|完成/i.test(value))
-      return { text: '已完成', icon: '✓', className: 'is-completed', running: false }
-    if (/failed|失敗/i.test(value)) return { text: '失敗', icon: '!', className: 'is-failed', running: false }
-    if (/blocked|阻塞/i.test(value)) return { text: '已阻塞', icon: '!', className: 'is-blocked', running: false }
-
-    return { text: value, icon: '?', className: 'is-unknown', running: false }
-  }
   const employees = computed(() =>
     roles.map((person) => ({
       ...person,
-      ...statusInfo(props.roleStatuses[person.id]),
+      ...getRoleStatusInfo(props.roleStatuses[person.id]),
       avatarSvg: avatar(person.color, person.id === 'pm' || person.id === 'qa' ? '#624633' : '#383630'),
     }))
   )
