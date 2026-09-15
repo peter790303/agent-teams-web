@@ -2,6 +2,22 @@
   "name": "agent-teams-web",
   "private": true,
   "type": "module",
-  "scripts": {"dev":"nuxt dev --port 30679","build":"nuxt build","typecheck":"nuxt typecheck"},
-  "devDependencies": {"nuxt":"^3.17.0","typescript":"^5.9.3","vue-tsc":"^2.2.10","@types/node":"^22.20.2"}
+  "scripts": {
+    "dev": "nuxt dev --port 30679",
+    "build": "nuxt build",
+    "typecheck": "nuxt typecheck",
+    "lint": "nuxt prepare && eslint ."
+  },
+  "devDependencies": {
+    "@nuxt/eslint": "^1.17.0",
+    "@types/node": "^22.20.2",
+    "eslint": "^10.10.0",
+    "nuxt": "^3.17.0",
+    "typescript": "^5.9.3",
+    "vite-plugin-vuetify": "^2.1.3",
+    "vue-tsc": "^2.2.10"
+  },
+  "dependencies": {
+    "vuetify": "^3.13.4"
+  }
 }
