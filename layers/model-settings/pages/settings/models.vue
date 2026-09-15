@@ -4,7 +4,7 @@
    * 🔧 Defines: 引入必要的模組和庫
    *********************************************/
   import { useModelSettings } from '~/layers/model-settings/composables/useModelSettings'
-  import type { HealthEntry, ModelCatalog } from '~/layers/model-settings/types'
+  import type { Capacity, HealthEntry, ModelCatalog } from '~/layers/model-settings/types'
 
   /*********************************************
    * 📂 Category: Page Meta  (Nuxt only)
@@ -12,6 +12,20 @@
    *********************************************/
 
   useSeoMeta({ title: '模型設定與監控' })
+
+  /*********************************************
+   * 📂 Category: Interface
+   * 🔧 Defines: 定義元件內使用的自訂 TypeScript 型別
+   *********************************************/
+  interface CapacityRow extends Capacity {
+    capacityText: string
+  }
+  interface HealthRow extends HealthEntry {
+    affectedModelsText: string
+    quotaText: string
+    estimatedReasonText: string | null
+    observedAtText: string
+  }
 
   /*********************************************
    * 📂 Category: Composables / Plugins
@@ -38,10 +52,8 @@
 
   /*********************************************
    * 📂 Category: Computed
-   * 🔧 Defines: 提供模板使用的顯示資料
+   * 🔧 Defines: 定義計算屬性
    *********************************************/
-  const candidateLabel = (candidate: { providerId: string; modelId: string }): string =>
-    `${candidate.providerId}/${candidate.modelId}`
   const catalogItems = computed(() =>
     catalog.value.map((candidate: ModelCatalog) => ({
       ...candidate,
@@ -49,15 +61,28 @@
       label: candidateLabel(candidate),
     }))
   )
-  const healthRows = computed(() =>
+  const capacityRows = computed<CapacityRow[]>(() =>
+    capacities.value.map((capacity: Capacity) => ({
+      ...capacity,
+      capacityText: `${capacity.currentCapacity}/${capacity.maxCapacity}`,
+    }))
+  )
+  const healthRows = computed<HealthRow[]>(() =>
     health.value.map((entry: HealthEntry) => ({
       ...entry,
       affectedModelsText: entry.affectedModels.join(', ') || '—',
       quotaText: `${entry.quota.status} ${entry.quota.amount ?? '—'} ${entry.quota.unit ?? ''}`.trim(),
       estimatedReasonText: entry.quota.isEstimated ? entry.quota.estimatedReason : '',
-      freshnessText: entry.isStale ? '過期' : '新鮮',
+      observedAtText: `${entry.isStale ? '過期' : '新鮮'} · ${entry.observedAt}`,
     }))
   )
+
+  /*********************************************
+   * 📂 Category: Methods
+   * 🔧 Defines: 定義函數與事件處理
+   *********************************************/
+  const candidateLabel = (candidate: { providerId: string; modelId: string }): string =>
+    `${candidate.providerId}/${candidate.modelId}`
 
   /*********************************************
    * 📂 Category: Lifecycle Hooks
@@ -117,13 +142,17 @@
               <v-text-field v-model="editor.draft.latencyScore" label="延遲分數" type="number" />
               <v-btn
                 type="submit"
+                class="mt-3"
                 :disabled="editor.loadState === 'failed' || editor.loadState === 'pending' || catalogState !== 'loaded'"
                 >新增候選</v-btn
               >
             </form>
             <p v-if="catalogError" role="alert">{{ catalogError }}</p>
             <p v-else-if="catalogState === 'loaded' && catalog.length === 0">Provider 尚未回傳可用模型</p>
-            <v-btn :disabled="editor.loadState !== 'loaded' && editor.loadState !== 'missing'" @click="save(editor)"
+            <v-btn
+              class="mt-3"
+              :disabled="editor.loadState !== 'loaded' && editor.loadState !== 'missing'"
+              @click="save(editor)"
               >儲存</v-btn
             >
           </section>
@@ -135,9 +164,9 @@
             <h2>角色容量</h2>
             <table>
               <tbody>
-                <tr v-for="capacity in capacities" :key="capacity.role">
+                <tr v-for="capacity in capacityRows" :key="capacity.role">
                   <td>{{ capacity.role }}</td>
-                  <td>{{ capacity.currentCapacity }}/{{ capacity.maxCapacity }}</td>
+                  <td>{{ capacity.capacityText }}</td>
                   <td>{{ capacity.availableCapacity }}</td>
                 </tr>
               </tbody>
@@ -157,7 +186,7 @@
                   <td>{{ entry.affectedModelsText }}</td>
                   <td>{{ entry.quotaText }}</td>
                   <td>{{ entry.estimatedReasonText }}</td>
-                  <td>{{ entry.freshnessText }} · {{ entry.observedAt }}</td>
+                  <td>{{ entry.observedAtText }}</td>
                 </tr>
               </tbody>
             </table>

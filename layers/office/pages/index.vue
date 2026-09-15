@@ -136,13 +136,14 @@
       <v-row>
         <v-col cols="12">
           <section class="taskbar">
-            <form @submit.prevent="submit">
+            <form class="d-flex ga-2" @submit.prevent="submit">
               <v-text-field
                 v-model="purpose"
                 required
                 hide-details
                 density="compact"
                 variant="outlined"
+                bg-color="inputSurface"
                 placeholder="建立新任務，例如：整理登入流程"
               /><v-text-field
                 v-model="projectId"
@@ -150,6 +151,7 @@
                 hide-details
                 density="compact"
                 variant="outlined"
+                bg-color="inputSurface"
                 aria-label="Project ID"
                 placeholder="project id"
               /><v-btn type="submit" color="primary">＋ 新增任務</v-btn>
@@ -168,15 +170,15 @@
       ></v-row>
     </main>
     <v-dialog v-model="dialogVisible" max-width="420">
-      <v-card v-if="selectedRole" class="role-dialog-card">
+      <v-card v-if="selectedRole" border rounded="lg" class="pa-2">
         <v-card-title
           >{{ selectedRole.name }} <small>{{ selectedRole.en }}</small></v-card-title
         >
-        <v-card-text
+        <v-card-text class="text-medium-emphasis"
           ><p>{{ roleDescriptions[selectedRole.id] }}</p>
-          <p class="role-status">{{ roleTaskText }}</p></v-card-text
+          <p class="border-t mt-3 pt-3">{{ roleTaskText }}</p></v-card-text
         >
-        <v-card-actions class="dialog-actions"
+        <v-card-actions class="justify-end"
           ><v-btn variant="outlined" @click="closeRole">關閉</v-btn
           ><v-btn to="/settings/models" color="primary">設定角色模型</v-btn></v-card-actions
         >

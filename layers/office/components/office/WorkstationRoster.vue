@@ -4,6 +4,7 @@
    * 🔧 Defines: 引入角色與 SVG 資產
    *********************************************/
   import { computed } from 'vue'
+  import { useDisplay } from 'vuetify'
 
   import type { DispatchStatus } from '~/layers/domain/task/types/DispatchStatus'
   import { avatar, roles } from '~/layers/office/assets/originalOffice'
@@ -16,9 +17,19 @@
   const props = defineProps<{ roleStatuses: Record<string, DispatchStatus>; onRole: (id: string) => void }>()
 
   /*********************************************
+   * 📂 Category: Composables / Plugins
+   * 🔧 Defines: 自定 composables、Pinia 狀態、i18n、plugin 等注入來源
+   *********************************************/
+  const { mdAndDown, xs } = useDisplay()
+
+  /*********************************************
    * 📂 Category: Computed
    * 🔧 Defines: 定義計算屬性
    *********************************************/
+  const displayClass = computed<Record<string, boolean>>(() => ({
+    'is-medium': mdAndDown.value,
+    'is-mobile': xs.value,
+  }))
   const employees = computed(() =>
     roles.map((person) => ({
       ...person,
@@ -34,7 +45,7 @@
   const selectRole = (id: string): void => props.onRole(id)
 </script>
 <template>
-  <section class="roster" aria-label="團隊工作站">
+  <section class="roster" :class="displayClass" aria-label="團隊工作站">
     <div class="roster-title">
       <span>團隊工作站 <span class="text-medium-emphasis">／ TEAM STATIONS</span></span
       ><span>{{ roles.length }} 個工作站</span>

@@ -491,26 +491,6 @@ h1 small {
   margin-top: 16px;
   padding: 18px;
 }
-.taskbar form {
-  display: flex;
-  gap: 8px;
-}
-.taskbar input,
-input {
-  background: rgb(var(--v-theme-input-surface));
-  border: 1px solid rgb(var(--v-theme-border));
-  color: rgb(var(--v-theme-text));
-  padding: 10px;
-  flex: 1;
-}
-button {
-  background: rgb(var(--v-theme-accent));
-  color: rgb(var(--v-theme-accent-text));
-  border: 0;
-  padding: 10px 16px;
-  font-weight: 700;
-  cursor: pointer;
-}
 .roster {
   display: flex;
   gap: 10px;
@@ -553,13 +533,6 @@ button {
   border: 1px solid rgb(var(--v-theme-border));
   padding: 18px;
   margin-top: 16px;
-}
-.policy label {
-  display: block;
-  margin: 10px 0;
-}
-.policy button {
-  margin-top: 10px;
 }
 table {
   width: 100%;
@@ -881,10 +854,6 @@ th {
   color: #88928c;
   font-size: 10px;
 }
-.office-card .legend {
-  display: flex;
-  gap: 12px;
-}
 .office-card .legend .dot {
   display: inline-block;
   width: 5px;
@@ -969,116 +938,30 @@ th {
   font-size: 10px;
   margin-right: 2px;
 }
-@media (max-width: 1100px) {
-  .roster .employees {
-    grid-template-columns: repeat(4, 1fr);
-  }
+/* Pixel illustration breakpoints are toggled from useDisplay() in PixelOfficeMap / WorkstationRoster. */
+.roster.is-medium .employees {
+  grid-template-columns: repeat(4, 1fr);
 }
-@media (max-width: 850px) {
-  .office-card .person-label {
-    font-size: 11px;
-  }
-  .office-card .person-avatar {
-    margin-bottom: 8px;
-  }
-}
-@media (max-width: 500px) {
-  .office-card .map-wrap {
-    padding: 5px;
-  }
-  .office-card .person-label {
-    font-size: 7px;
-    padding: 1px 3px;
-    margin-top: 8px;
-  }
-  .office-card .person-label small {
-    font-size: 6px;
-  }
-  .office-card .person-avatar {
-    margin-bottom: 2px;
-  }
-  .office-card .legend {
-    display: none;
-  }
-  .roster .employees {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-
-/* Role details are intentionally local to the office overview. */
-.role-dialog {
-  position: fixed;
-  z-index: 20;
-  inset: 50% auto auto 50%;
-  transform: translate(-50%, -50%);
-  width: min(420px, calc(100vw - 32px));
-  padding: 22px;
-  background: #1b2423;
-  color: #d8dcd3;
-  border: 1px solid #697b61;
-  border-radius: 8px;
-  box-shadow: 0 20px 70px #000b;
-}
-.role-dialog::backdrop {
-  background: #07100dcc;
-}
-.role-dialog h2 {
-  margin: 0 0 10px;
-  font-size: 18px;
-}
-.role-dialog h2 small {
-  display: block;
-  color: #91a18d;
+.office-card.is-compact .person-label {
   font-size: 11px;
-  font-weight: 400;
-  margin-top: 3px;
 }
-.role-dialog p {
-  color: #b6c1b5;
-  margin: 8px 0;
+.office-card.is-compact .person-avatar {
+  margin-bottom: 8px;
 }
-.role-dialog .role-status {
-  border-top: 1px solid #35413b;
-  padding-top: 12px;
+.office-card.is-mobile .map-wrap {
+  padding: 5px;
 }
-.dialog-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 8px;
-  margin-top: 18px;
+.office-card.is-mobile .person-label {
+  font-size: 7px;
+  padding: 1px 3px;
+  margin-top: 8px;
 }
-.dialog-actions button,
-.dialog-actions a {
-  border: 1px solid #52624e;
-  background: #26332d;
-  color: #d8dcd3;
-  border-radius: 4px;
-  padding: 7px 12px;
-  text-decoration: none;
+.office-card.is-mobile .person-label small {
+  font-size: 6px;
 }
-.dialog-actions a {
-  background: #b5c991;
-  color: #202a21;
+.office-card.is-mobile .person-avatar {
+  margin-bottom: 2px;
 }
-.role-dialog-card {
-  background: #1b2423 !important;
-  color: #d8dcd3;
-  border: 1px solid #697b61;
-  border-radius: 8px;
-  box-shadow: 0 20px 70px #000b;
-}
-.role-dialog-card .v-card-title {
-  font-size: 18px;
-  padding: 22px 22px 10px;
-}
-.role-dialog-card .v-card-text {
-  color: #b6c1b5;
-  padding: 0 22px;
-}
-.role-dialog-card .role-status {
-  border-top: 1px solid #35413b;
-  padding-top: 12px;
-}
-.role-dialog-card .dialog-actions {
-  padding: 0 22px 18px;
+.roster.is-mobile .employees {
+  grid-template-columns: repeat(2, 1fr);
 }
