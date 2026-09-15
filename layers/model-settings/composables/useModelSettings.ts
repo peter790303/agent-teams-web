@@ -7,6 +7,7 @@ import { MODEL_ROLES } from '~/layers/domain/types'
 
 import { getCapacities, getCatalog, getHealth, getPolicy, savePolicy } from '../repositories'
 import type {
+  CandidateDraft,
   Capacity,
   HealthEntry,
   ModelCatalog,
@@ -15,7 +16,13 @@ import type {
   PolicyEditor,
   Role,
 } from '../types'
-import { useModelSettingsHelpers } from '../utils/modelSettingsHelpers'
+
+/*********************************************
+ * 📂 Category: Static Data
+ * 🔧 Defines: 模型設定頁面的固定資料
+ *********************************************/
+
+const roles: readonly Role[] = MODEL_ROLES
 
 export const useModelSettings = (): ModelSettingsComposable => {
   /*********************************************
@@ -23,17 +30,26 @@ export const useModelSettings = (): ModelSettingsComposable => {
    * 🔧 Defines: 模型設定頁面的反應式狀態
    *********************************************/
 
-  const roles: readonly Role[] = MODEL_ROLES
-  const {
-    createBlankDraft,
-    createEditor,
-    convertCandidateToDraft,
-    convertDraftToCandidate,
-    convertFiniteNumber,
-    formatModelKey,
-  } = useModelSettingsHelpers()
-
-  const editors = ref<PolicyEditor[]>(roles.map(createEditor))
+  const editors = ref<PolicyEditor[]>(
+    roles.map((role: Role): PolicyEditor => ({
+      role,
+      minQualityScore: '0',
+      version: 0,
+      updatedAt: '',
+      candidates: [],
+      selectedIds: [],
+      candidateDrafts: {},
+      draft: {
+        providerId: '',
+        modelId: '',
+        capabilities: '',
+        qualityScore: '',
+        costScore: '',
+        latencyScore: '',
+      },
+      loadState: 'pending',
+    }))
+  )
   const capacities = ref<Capacity[]>([])
   const health = ref<HealthEntry[]>([])
   const catalog = ref<ModelCatalog[]>([])
@@ -46,6 +62,49 @@ export const useModelSettings = (): ModelSettingsComposable => {
    * 📂 Category: Methods
    * 🔧 Defines: 模型政策載入、編輯與儲存流程
    *********************************************/
+
+  const createBlankDraft = (): CandidateDraft => ({
+    providerId: '',
+    modelId: '',
+    capabilities: '',
+    qualityScore: '',
+    costScore: '',
+    latencyScore: '',
+  })
+  const formatModelKey = (model: Pick<ModelCandidate, 'providerId' | 'modelId'>): string =>
+    `${model.providerId}:${model.modelId}`
+  const convertCandidateToDraft = (candidate: ModelCandidate): CandidateDraft => ({
+    providerId: candidate.providerId,
+    modelId: candidate.modelId,
+    capabilities: candidate.capabilities.join(', '),
+    qualityScore: String(candidate.qualityScore),
+    costScore: String(candidate.costScore),
+    latencyScore: String(candidate.latencyScore),
+  })
+  const convertFiniteNumber = (value: string, label: string): number => {
+    if (value.trim() === '') throw new Error(`${label} 必須是有限數字`)
+    const parsed = Number(value)
+    if (!Number.isFinite(parsed)) throw new Error(`${label} 必須是有限數字`)
+
+    return parsed
+  }
+  const convertDraftToCandidate = (draft: CandidateDraft): ModelCandidate => {
+    const capabilities = draft.capabilities
+      .split(',')
+      .map((value) => value.trim())
+      .filter(Boolean)
+    if (!draft.providerId.trim() || !draft.modelId.trim()) throw new Error('Provider 與 Model 必須填寫')
+    if (capabilities.length === 0) throw new Error('至少填寫一項能力')
+
+    return {
+      providerId: draft.providerId.trim(),
+      modelId: draft.modelId.trim(),
+      capabilities,
+      qualityScore: convertFiniteNumber(draft.qualityScore, '品質分數'),
+      costScore: convertFiniteNumber(draft.costScore, '成本分數'),
+      latencyScore: convertFiniteNumber(draft.latencyScore, '延遲分數'),
+    }
+  }
 
   const load = async (): Promise<void> => {
     const policiesPromise = Promise.all(
