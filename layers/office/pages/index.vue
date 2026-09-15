@@ -1,5 +1,8 @@
 <script setup lang="ts">
 import { useOffice } from '~/layers/office/composables/useOffice'
+import CommandCenter from '~/layers/office/components/office/CommandCenter.vue'
+import PixelOfficeMap from '~/layers/office/components/office/PixelOfficeMap.vue'
+import WorkstationRoster from '~/layers/office/components/office/WorkstationRoster.vue'
 const { tasks, error, load, create } = useOffice()
 const purpose = ref('')
 const projectId = ref('default')
