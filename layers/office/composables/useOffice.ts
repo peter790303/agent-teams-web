@@ -13,34 +13,44 @@ interface ResumeTaskCommand { id: string; instruction: string; worktree: string;
 interface SubmitTaskCommand { id: string; worktree: string; commit: string; gate: string; idempotencyKey: string }
 
 /*********************************************
- * 📂 Category: Composables / Plugins
- * 🔧 Defines: 自定 composables、Pinia 狀態、i18n、plugin 等注入來源
- *********************************************/
-
-/*********************************************
  * 📂 Category: Static Data
  * 🔧 Defines: 不會改變的靜態資料，例如選單、enum 對應等
  *********************************************/
 const statusLabel = (status: string): string => ({ running: '執行中', active: '執行中', completed: '已完成', succeeded: '已完成', failed: '失敗', blocked: '已阻塞', pending: '等待中' })[status.toLowerCase()] ?? status
 
 /*********************************************
+ * 📂 Category: Methods
+ * 🔧 Defines: 定義函數與事件處理
+ *********************************************/
+export function useOffice() {
+
+/*********************************************
  * 📂 Category: Refs / Reactive State
  * 🔧 Defines: 元件中的 ref, reactive 等可變資料狀態
  *********************************************/
+  const tasks = useState<Task[]>('tasks', () => [])
+  const taskStates = useState<TaskState[]>('task-states', () => [])
+  const error = useState<string | null>('tasks-error', () => null)
 
 /*********************************************
  * 📂 Category: Computed
  * 🔧 Defines: 定義計算屬性
  *********************************************/
+  const roleStatuses = computed<Record<string, string>>(() => taskStates.value.reduce<Record<string, string>>((statuses, state) => {
+    state.data.dispatches.forEach((dispatch) => {
+      const next = statusLabel(dispatch.status)
+      const previous = statuses[dispatch.role]
+      const running = /running|執行中|active/i.test(dispatch.status)
+      const previousRunning = previous !== undefined && /running|執行中|active/i.test(previous)
+      if (previous === undefined || running || !previousRunning) statuses[dispatch.role] = next
+    })
+    return statuses
+  }, {}))
 
 /*********************************************
  * 📂 Category: Methods
  * 🔧 Defines: 定義函數與事件處理
  *********************************************/
-export function useOffice() {
-  const tasks = useState<Task[]>('tasks', () => [])
-  const taskStates = useState<TaskState[]>('task-states', () => [])
-  const error = useState<string | null>('tasks-error', () => null)
   const setError = (message: string | null): void => { error.value = message }
   const load = async (): Promise<void> => {
     setError(null)
@@ -67,16 +77,6 @@ export function useOffice() {
     setError(message)
     throw new Error(message)
   }
-  const roleStatuses = computed<Record<string, string>>(() => taskStates.value.reduce<Record<string, string>>((statuses, state) => {
-    state.data.dispatches.forEach((dispatch) => {
-      const next = statusLabel(dispatch.status)
-      const previous = statuses[dispatch.role]
-      const running = /running|執行中|active/i.test(dispatch.status)
-      const previousRunning = previous !== undefined && /running|執行中|active/i.test(previous)
-      if (previous === undefined || running || !previousRunning) statuses[dispatch.role] = next
-    })
-    return statuses
-  }, {}))
   const resumeWithReviewContext = async (command: ResumeTaskCommand): Promise<void> => {
     const result = await resumeTask(command)
     if (result.error) { setError(result.error); throw new Error(result.error) }

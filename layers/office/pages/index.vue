@@ -9,16 +9,16 @@ import PixelOfficeMap from '~/layers/office/components/office/PixelOfficeMap.vue
 import WorkstationRoster from '~/layers/office/components/office/WorkstationRoster.vue'
 
 /*********************************************
- * 📂 Category: Composables / Plugins
- * 🔧 Defines: 元件使用的 composable 與 plugin
- *********************************************/
-const { tasks, roleStatuses, error, load, create } = useOffice()
-
-/*********************************************
- * 📂 Category: Page Meta
- * 🔧 Defines: 頁面 SEO 與 metadata
+ * 📂 Category: Page Meta  (Nuxt only)
+ * 🔧 Defines: 以 definePageMeta() 宣告的頁面層級設定
  *********************************************/
 useSeoMeta({ title: 'AI Office' })
+
+/*********************************************
+ * 📂 Category: Composables / Plugins
+ * 🔧 Defines: 自定 composables、Pinia 狀態、i18n、plugin 等注入來源
+ *********************************************/
+const { tasks, roleStatuses, error, load, create } = useOffice()
 
 /*********************************************
  * 📂 Category: Refs / Reactive State

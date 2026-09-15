@@ -7,6 +7,13 @@
 import { useModelSettings } from '~/layers/model-settings/composables/useModelSettings'
 
 /*********************************************
+ * 📂 Category: Page Meta  (Nuxt only)
+ * 🔧 Defines: 以 definePageMeta() 宣告的頁面層級設定
+ *********************************************/
+
+useSeoMeta({ title: '模型設定與監控' })
+
+/*********************************************
  * 📂 Category: Composables / Plugins
  * 🔧 Defines: 自定 composables、Pinia 狀態、i18n、plugin 等注入來源
  *********************************************/
@@ -17,8 +24,6 @@ const { editors, capacities, health, message, error, load, addCandidate, toggle,
  * 📂 Category: Lifecycle Hooks
  * 🔧 Defines: Vue 生命週期 hook —— onMounted、onUnmounted 等
  *********************************************/
-
-useSeoMeta({ title: '模型設定與監控' })
 onMounted(load)
 </script>
 <template>

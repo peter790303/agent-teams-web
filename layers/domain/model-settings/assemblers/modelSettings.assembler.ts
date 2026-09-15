@@ -6,7 +6,7 @@
 import { toModel } from '../../model/assemblers/model.assembler'
 import { MODEL_ROLES, type Role } from '../../types'
 import type { Capacity, HealthEntry, Policy, PolicyData } from '../ModelSettings'
-import type { CapacityResource, HealthResource, PolicyResource } from '~/layers/model-settings/types/api'
+import type { CapacityResource, HealthResource, PolicyResource } from '../resources'
 
 /*********************************************
  * 📂 Category: Methods

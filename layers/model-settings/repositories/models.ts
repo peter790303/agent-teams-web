@@ -8,7 +8,7 @@ import type { Model as ModelCandidate } from '~/layers/domain/model/Model'
 import { MODEL_ROLES, type Role } from '~/layers/domain/types'
 import { toCapacity, toHealth, toPolicy } from '~/layers/domain/model-settings/assemblers/modelSettings.assembler'
 import type { Capacity, HealthEntry, Policy } from '../types'
-import type { CapacityResource, HealthResource, PolicyResource } from '../types/api'
+import type { CapacityResource, HealthResource, PolicyResource } from '~/layers/domain/model-settings/resources'
 import { toPolicyPayload } from '../utils/modelSettingsMappers'
 
 /*********************************************
