@@ -1,5 +1,8 @@
 <script setup lang="ts">
-// 📂 Category: shared page layout
+/*********************************************
+ * 📂 Category: Props / Emits
+ * 🔧 Defines: 元件輸入參數
+ *********************************************/
 withDefaults(
   defineProps<{
     maxWidth?: string | number

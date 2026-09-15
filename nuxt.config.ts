@@ -1,3 +1,7 @@
+/*********************************************
+ * 📂 Category: Methods
+ * 🔧 Defines: Nuxt 應用程式設定
+ *********************************************/
 export default defineNuxtConfig({
   extends: ['./layers/base', './layers/domain', './layers/office', './layers/model-settings'],
   modules: ['@nuxt/eslint'],

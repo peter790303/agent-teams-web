@@ -1,4 +1,8 @@
 <script setup lang="ts">
+/*********************************************
+ * 📂 Category: Static Data
+ * 🔧 Defines: 不會改變的靜態資料，例如選單、enum 對應等
+ *********************************************/
 const sections = [{ label: '總覽', path: '/' }, { label: '模型設定', path: '/settings/models' }]
 </script>
 <template>

@@ -1,7 +1,15 @@
+/*********************************************
+ * 📂 Category: Imports
+ * 🔧 Defines: 引入必要的模組和庫
+ *********************************************/
 import { createVuetify } from 'vuetify'
 
 import 'vuetify/styles'
 
+/*********************************************
+ * 📂 Category: Composables / Plugins
+ * 🔧 Defines: Vuetify plugin 與主題設定
+ *********************************************/
 export default defineNuxtPlugin((nuxtApp) => {
   const vuetify = createVuetify({
     theme: {

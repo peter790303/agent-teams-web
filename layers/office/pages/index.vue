@@ -1,15 +1,43 @@
 <script setup lang="ts">
+/*********************************************
+ * 📂 Category: Imports
+ * 🔧 Defines: 引入必要的模組和庫
+ *********************************************/
 import { useOffice } from '~/layers/office/composables/useOffice'
 import CommandCenter from '~/layers/office/components/office/CommandCenter.vue'
 import PixelOfficeMap from '~/layers/office/components/office/PixelOfficeMap.vue'
 import WorkstationRoster from '~/layers/office/components/office/WorkstationRoster.vue'
 
-// 📂 Category: page view model
+/*********************************************
+ * 📂 Category: Composables / Plugins
+ * 🔧 Defines: 元件使用的 composable 與 plugin
+ *********************************************/
 const { tasks, roleStatuses, error, load, create } = useOffice()
+
+/*********************************************
+ * 📂 Category: Page Meta
+ * 🔧 Defines: 頁面 SEO 與 metadata
+ *********************************************/
+useSeoMeta({ title: 'AI Office' })
+
+/*********************************************
+ * 📂 Category: Refs / Reactive State
+ * 🔧 Defines: 頁面互動狀態
+ *********************************************/
 const purpose = ref<string>('')
 const projectId = ref<string>('default')
-useSeoMeta({ title: 'AI Office' })
-onMounted(load)
+
+/*********************************************
+ * 📂 Category: Computed
+ * 🔧 Defines: 由狀態推導的顯示資料
+ *********************************************/
+const systemStatus = computed(() => Object.keys(roleStatuses.value).length > 0 ? 'API 已連線' : '未知')
+const taskLinks = computed(() => tasks.value.map((task) => ({ ...task, href: `/office/tasks/${task.id}` })))
+
+/*********************************************
+ * 📂 Category: Methods
+ * 🔧 Defines: 頁面事件與資料操作
+ *********************************************/
 const submit = async (): Promise<void> => {
   if (!purpose.value.trim()) return
   try {
@@ -19,8 +47,12 @@ const submit = async (): Promise<void> => {
     // useOffice stores the API error for the alert below.
   }
 }
-const systemStatus = computed(() => Object.keys(roleStatuses.value).length > 0 ? 'API 已連線' : '未知')
-const taskLinks = computed(() => tasks.value.map((task) => ({ ...task, href: `/office/tasks/${task.id}` })))
+
+/*********************************************
+ * 📂 Category: Lifecycle Hooks
+ * 🔧 Defines: 頁面生命週期處理
+ *********************************************/
+onMounted(load)
 </script>
 <template>
   <BasePageLayout>

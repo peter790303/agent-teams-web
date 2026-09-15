@@ -1,4 +1,13 @@
+/*********************************************
+ * 📂 Category: Imports
+ * 🔧 Defines: 引入必要的模組和庫
+ *********************************************/
 import type { Task } from '~/layers/domain/task/Task'
+
+/*********************************************
+ * 📂 Category: Interface
+ * 🔧 Defines: 定義元件內使用的自訂 TypeScript 型別
+ *********************************************/
 export type { Role } from '~/layers/domain/types'
 export type { Task } from '~/layers/domain/task/Task'
 export interface Dispatch { id: string; role: string; status: string; blockedReasons: string[]; dependencies: string[]; updatedAt: string }
