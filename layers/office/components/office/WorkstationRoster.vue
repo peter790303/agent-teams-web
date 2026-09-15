@@ -8,11 +8,10 @@
   import { avatar, roles } from '~/layers/office/assets/originalOffice'
 
   /*********************************************
-   * 📂 Category: Props / Emits
-   * 🔧 Defines: 角色狀態輸入與選取事件
+   * 📂 Category: Props
+   * 🔧 Defines: 角色狀態輸入與選取回呼
    *********************************************/
-  const props = defineProps<{ roleStatuses: Record<string, string> }>()
-  const emit = defineEmits<{ role: [id: string] }>()
+  const props = defineProps<{ roleStatuses: Record<string, string>; onRole: (id: string) => void }>()
   const statusInfo = (value?: string): { text: string; icon: string; className: string; running: boolean } => {
     if (!value) return { text: '資料未提供', icon: '?', className: 'is-unknown', running: false }
     if (/running|執行中|active/i.test(value))
@@ -33,7 +32,7 @@
       avatarSvg: avatar(person.color, person.id === 'pm' || person.id === 'qa' ? '#624633' : '#383630'),
     }))
   )
-  const selectRole = (id: string): void => emit('role', id)
+  const selectRole = (id: string): void => props.onRole(id)
 </script>
 <template>
   <section class="roster" aria-label="團隊工作站">

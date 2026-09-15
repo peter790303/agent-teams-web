@@ -127,7 +127,7 @@
         </div>
       </header>
       <v-row class="workspace" :class="{ 'is-narrow': mdAndDown }">
-        <v-col cols="12" md="8"><PixelOfficeMap :role-statuses="roleStatuses" @role="openRole" /></v-col>
+        <v-col cols="12" md="8"><PixelOfficeMap :role-statuses="roleStatuses" :on-role="openRole" /></v-col>
         <v-col cols="12" md="4"
           ><CommandCenter :tasks="tasks" :activities="activities" :task-load-status="taskLoadStatus"
         /></v-col>
@@ -163,7 +163,7 @@
         </v-col>
       </v-row>
       <v-row
-        ><v-col cols="12"><WorkstationRoster :role-statuses="roleStatuses" @role="openRole" /></v-col
+        ><v-col cols="12"><WorkstationRoster :role-statuses="roleStatuses" :on-role="openRole" /></v-col
       ></v-row>
     </main>
     <v-dialog v-model="dialogVisible" max-width="420">
