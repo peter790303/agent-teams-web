@@ -154,8 +154,8 @@
               /><v-btn type="submit" color="primary">＋ 新增任務</v-btn>
             </form>
             <p v-if="error" role="alert">{{ error }}</p>
-            <div class="task-list">
-              <NuxtLink v-for="task in taskLinks" :key="task.id" :to="task.href"
+            <div class="task-list d-flex flex-wrap ga-2 mt-3">
+              <NuxtLink v-for="task in taskLinks" :key="task.id" class="pa-2 bg-taskSurface" :to="task.href"
                 >{{ task.purpose }} <small>{{ task.stage }}</small></NuxtLink
               >
             </div>

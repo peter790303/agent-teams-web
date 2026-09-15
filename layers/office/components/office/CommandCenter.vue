@@ -125,7 +125,12 @@
       <section class="command-section px-3 py-2 border-b border-border">
         <h2 class="ma-0 text-body-2 font-weight-bold">待處理</h2>
         <div class="task-list d-flex flex-column ga-1 mt-1">
-          <NuxtLink v-for="task in pendingTasks" :key="task.id" class="task-item" :to="`/office/tasks/${task.id}`">
+          <NuxtLink
+            v-for="task in pendingTasks"
+            :key="task.id"
+            class="task-item d-flex flex-column pa-2 bg-taskSurface text-caption"
+            :to="`/office/tasks/${task.id}`"
+          >
             <strong>{{ task.purpose }}</strong
             ><small>{{ task.stage }}</small>
           </NuxtLink>
@@ -173,7 +178,11 @@
         >
       </div>
       <div class="task-list d-flex flex-column ga-1 mt-1">
-        <NuxtLink v-for="task in props.tasks" :key="task.id" class="task-item" :to="`/office/tasks/${task.id}`"
+        <NuxtLink
+          v-for="task in props.tasks"
+          :key="task.id"
+          class="task-item d-flex flex-column pa-2 bg-taskSurface text-caption"
+          :to="`/office/tasks/${task.id}`"
           ><strong>{{ task.purpose }}</strong
           ><small>{{ task.projectId }} · {{ task.stage }}</small></NuxtLink
         >
