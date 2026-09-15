@@ -7,6 +7,7 @@ import { useOffice } from '~/layers/office/composables/useOffice'
 import CommandCenter from '~/layers/office/components/office/CommandCenter.vue'
 import PixelOfficeMap from '~/layers/office/components/office/PixelOfficeMap.vue'
 import WorkstationRoster from '~/layers/office/components/office/WorkstationRoster.vue'
+import { useDisplay } from 'vuetify'
 
 /*********************************************
  * 📂 Category: Page Meta  (Nuxt only)
@@ -18,7 +19,8 @@ useSeoMeta({ title: 'AI Office' })
  * 📂 Category: Composables / Plugins
  * 🔧 Defines: 自定 composables、Pinia 狀態、i18n、plugin 等注入來源
  *********************************************/
-const { tasks, roleStatuses, error, load, create } = useOffice()
+const { tasks, taskStates, roleStatuses, error, load, create } = useOffice()
+const { mdAndDown } = useDisplay()
 
 /*********************************************
  * 📂 Category: Refs / Reactive State
@@ -31,8 +33,12 @@ const projectId = ref<string>('default')
  * 📂 Category: Computed
  * 🔧 Defines: 定義計算屬性
  *********************************************/
-const systemStatus = computed(() => Object.keys(roleStatuses.value).length > 0 ? 'API 已連線' : '未知')
+const systemStatus = computed(() => Object.keys(roleStatuses.value).length > 0 ? '正常運行中' : '資料未提供')
 const taskLinks = computed(() => tasks.value.map((task) => ({ ...task, href: `/office/tasks/${task.id}` })))
+const activities = computed(() => taskStates.value.map((state) => state.data.activity).filter((item): item is string => Boolean(item?.trim())).slice(0, 5))
+const now = ref(new Date())
+const clockText = computed(() => now.value.toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit' }))
+const dateText = computed(() => now.value.toLocaleDateString('zh-TW', { year: 'numeric', month: '2-digit', day: '2-digit', weekday: 'short' }))
 
 /*********************************************
  * 📂 Category: Methods
@@ -52,15 +58,20 @@ const submit = async (): Promise<void> => {
  * 📂 Category: Lifecycle Hooks
  * 🔧 Defines: Vue 生命週期 hook —— onMounted、onUnmounted 等
  *********************************************/
-onMounted(load)
+let clockTimer: ReturnType<typeof setInterval> | undefined
+onMounted(() => {
+  load()
+  clockTimer = setInterval(() => { now.value = new Date() }, 60_000)
+})
+onUnmounted(() => { if (clockTimer) clearInterval(clockTimer) })
 </script>
 <template>
   <BasePageLayout>
     <main class="shell">
-      <header><h1>🏢 AI OFFICE <small>v0.1.0</small></h1><span>系統狀態：{{ systemStatus }}</span></header>
-      <v-row class="workspace">
+      <header class="office-header"><div class="brand"><span class="brand-mark">▦</span><div><h1>AI OFFICE <small>v0.1.0</small></h1><p>智能協作指揮中心</p></div></div><div class="header-meta"><span class="clock">☀ {{ clockText }} <small>{{ dateText }}</small></span><span class="health"><i /> 系統狀態：{{ systemStatus }}</span><span class="supervisor"><b>AI</b> 主控模式</span></div></header>
+      <v-row class="workspace" :class="{ 'is-narrow': mdAndDown }">
         <v-col cols="12" md="8"><PixelOfficeMap :role-statuses="roleStatuses" /></v-col>
-        <v-col cols="12" md="4"><CommandCenter /></v-col>
+        <v-col cols="12" md="4"><CommandCenter :tasks="tasks" :activities="activities" /></v-col>
       </v-row>
       <v-row>
         <v-col cols="12">
