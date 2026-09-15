@@ -1,0 +1,4 @@
+export type Task = { id: string; purpose: string; stage: string; createdAt?: string; updatedAt?: string }
+export type TaskState = { data: { task: Task; stage: string; activity: string; dispatches: Array<Record<string, unknown>>; executions: Array<Record<string, unknown>>; spec: Record<string, unknown> | null; plan: Record<string, unknown> | null; workspace: Record<string, unknown> | null; qaReport: Record<string, unknown> | null; delivery: Record<string, unknown> | null } }
+export type Policy = { data: { role: string; whitelist: Array<{ modelId: string; capabilities?: string[] }>; version: number; updatedAt: string } }
+export type Health = { data: Array<{ providerId: string; authStatus: string; callHealth: string; quota: { status: string; isEstimated?: boolean }; affectedModels: string[] }> }

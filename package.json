@@ -1,0 +1,7 @@
+{
+  "name": "agent-teams-web",
+  "private": true,
+  "type": "module",
+  "scripts": {"dev":"nuxt dev --port 30679","build":"nuxt build","typecheck":"nuxt typecheck"},
+  "devDependencies": {"nuxt":"^3.17.0","typescript":"^5.9.3","vue-tsc":"^2.2.10","@types/node":"^22.20.2"}
+}
