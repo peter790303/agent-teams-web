@@ -761,6 +761,20 @@ th {
 .workspace.is-narrow .pixel-map {
   min-height: 560px;
 }
+@media (min-width: 961px) {
+  .workspace {
+    display: flex;
+    flex-wrap: nowrap;
+  }
+  .workspace > .v-col:first-child {
+    flex: 0 0 66.666667%;
+    max-width: 66.666667%;
+  }
+  .workspace > .v-col:last-child {
+    flex: 0 0 33.333333%;
+    max-width: 33.333333%;
+  }
+}
 .pixel-map .plant {
   position: absolute;
   z-index: 3;
@@ -868,13 +882,14 @@ th {
   z-index: 1;
   min-height: 0;
   line-height: 1;
+  height: auto;
 }
 .office-card .person-avatar {
   display: block;
-  width: 29%;
+  width: 20%;
   height: auto;
   filter: drop-shadow(2px 3px 0 #0003);
-  margin-bottom: 8px;
+  margin-bottom: 3px;
 }
 .office-card .person-avatar svg {
   display: block;
@@ -882,22 +897,22 @@ th {
   height: auto;
 }
 .office-card .person-label {
-  margin-top: 14px;
+  margin-top: 2px;
   background: #263c32dd;
   border: 1px solid #a9bd802a;
   border-radius: 3px;
-  padding: 3px 8px;
+  padding: 2px 5px;
   color: #e6e4d6;
   white-space: nowrap;
-  font-size: clamp(7px, 0.68vw, 10px);
-  line-height: 1.35;
+  font-size: clamp(7px, 0.58vw, 9px);
+  line-height: 1.2;
   text-align: center;
 }
 .office-card .person-label small {
   display: block;
   color: #88928c;
-  font-size: clamp(7px, 0.58vw, 9px);
-  line-height: 1.35;
+  font-size: clamp(6px, 0.5vw, 8px);
+  line-height: 1.2;
 }
 .office-card .person-label small.is-running,
 .roster .employee .state.is-running {
@@ -974,9 +989,10 @@ th {
   border: 1px solid #323b39;
   border-radius: 5px;
   background: linear-gradient(135deg, #242c2c, #1a2022);
-  padding: 12px 9px;
+  padding: 8px 9px;
   text-align: left;
-  min-height: 72px;
+  min-height: 82px;
+  height: auto;
   overflow: hidden;
 }
 .roster .employee.is-active {
@@ -1011,6 +1027,16 @@ th {
   font-size: 9px;
   color: rgb(var(--v-theme-text-muted));
   margin-top: 5px;
+  line-height: 1.2;
+}
+.roster .employee .v-btn__content {
+  width: 100%;
+  min-height: 64px;
+  align-items: center;
+}
+.roster .employee .state span {
+  font-size: 10px;
+  margin-right: 2px;
 }
 @media (max-width: 1100px) {
   .roster .employees {

@@ -9,7 +9,11 @@
    * 📂 Category: Props / Emits
    * 🔧 Defines: 指揮中心資料輸入
    *********************************************/
-  const props = defineProps<{ tasks: Task[]; activities: string[] }>()
+  const props = defineProps<{
+    tasks: Task[]
+    activities: string[]
+    taskLoadStatus: 'idle' | 'loading' | 'success' | 'error'
+  }>()
 
   /*********************************************
    * 📂 Category: Refs / Reactive State
@@ -28,6 +32,12 @@
       ? props.activities
       : props.tasks.slice(0, 5).map((task) => `${task.purpose} · ${task.stage}`)
   )
+  const statsLabel = computed(() => {
+    if (props.taskLoadStatus === 'success') return null
+    if (props.taskLoadStatus === 'loading' || props.taskLoadStatus === 'idle') return '載入中…'
+
+    return '資料未提供'
+  })
 </script>
 <template>
   <aside class="panel command-center" aria-label="Command Center">
@@ -56,7 +66,8 @@
       </section>
       <section class="command-section">
         <h2>最新任務統計</h2>
-        <div class="stat-grid">
+        <div v-if="statsLabel" class="notice">{{ statsLabel }}</div>
+        <div v-else class="stat-grid">
           <div>
             <strong>{{ stats.completed }}</strong
             ><small>完成任務</small>

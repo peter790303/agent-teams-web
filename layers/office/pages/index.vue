@@ -21,7 +21,7 @@
    * 📂 Category: Composables / Plugins
    * 🔧 Defines: 自定 composables、Pinia 狀態、i18n、plugin 等注入來源
    *********************************************/
-  const { tasks, taskStates, roleStatuses, error, load, create } = useOffice()
+  const { tasks, taskLoadStatus, taskStates, roleStatuses, error, load, create } = useOffice()
   const { mdAndDown } = useDisplay()
 
   /*********************************************
@@ -128,7 +128,9 @@
       </header>
       <v-row class="workspace" :class="{ 'is-narrow': mdAndDown }">
         <v-col cols="12" md="8"><PixelOfficeMap :role-statuses="roleStatuses" @role="openRole" /></v-col>
-        <v-col cols="12" md="4"><CommandCenter :tasks="tasks" :activities="activities" /></v-col>
+        <v-col cols="12" md="4"
+          ><CommandCenter :tasks="tasks" :activities="activities" :task-load-status="taskLoadStatus"
+        /></v-col>
       </v-row>
       <v-row>
         <v-col cols="12">

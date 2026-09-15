@@ -40,6 +40,7 @@ export const useOffice = (): OfficeComposable => {
    * 🔧 Defines: 元件中的 ref, reactive 等可變資料狀態
    *********************************************/
   const tasks = useState<Task[]>('tasks', () => [])
+  const taskLoadStatus = useState<'idle' | 'loading' | 'success' | 'error'>('tasks-load-status', () => 'idle')
   const taskStates = useState<TaskState[]>('task-states', () => [])
   const error = useState<string | null>('tasks-error', () => null)
 
@@ -69,12 +70,14 @@ export const useOffice = (): OfficeComposable => {
     error.value = message
   }
   const load = async (): Promise<void> => {
+    taskLoadStatus.value = 'loading'
     setError(null)
     const taskResult = await listTasks()
     if (taskResult.error) {
       tasks.value = []
       taskStates.value = []
       setError(taskResult.error)
+      taskLoadStatus.value = 'error'
 
       return
     }
@@ -82,10 +85,12 @@ export const useOffice = (): OfficeComposable => {
       tasks.value = []
       taskStates.value = []
       setError('載入任務失敗')
+      taskLoadStatus.value = 'error'
 
       return
     }
     tasks.value = taskResult.data
+    taskLoadStatus.value = 'success'
     const states = await Promise.allSettled(tasks.value.map((task) => getTaskState({ id: task.id })))
     const stateErrors = states.flatMap((result) =>
       result.status === 'rejected'
@@ -158,6 +163,7 @@ export const useOffice = (): OfficeComposable => {
 
   return {
     tasks,
+    taskLoadStatus,
     taskStates,
     roleStatuses,
     error,

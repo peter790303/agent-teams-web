@@ -83,6 +83,7 @@ export interface SubmitTaskCommand {
 }
 export interface OfficeComposable {
   tasks: Ref<Task[]>
+  taskLoadStatus: Ref<'idle' | 'loading' | 'success' | 'error'>
   taskStates: Ref<TaskState[]>
   roleStatuses: ComputedRef<Record<string, string>>
   error: Ref<string | null>
