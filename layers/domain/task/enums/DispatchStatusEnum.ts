@@ -1,6 +1,6 @@
 /*********************************************
  * 📂 Category: Static Data
- * 🔧 Defines: Nest scheduler 回傳的 dispatch lifecycle enum
+ * 🔧 Defines: 不會改變的靜態資料，例如選單、enum 對應等
  *********************************************/
 export enum DispatchStatusEnum {
   PENDING = 'pending',

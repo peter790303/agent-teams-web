@@ -1,13 +1,13 @@
 /*********************************************
  * 📂 Category: Imports
- * 🔧 Defines: 引入 dispatch status 與角色狀態型別
+ * 🔧 Defines: 引入必要的模組和庫
  *********************************************/
 import { DispatchStatusEnum } from '~/layers/domain/task/enums/DispatchStatusEnum'
 import type { DispatchStatus } from '~/layers/domain/task/types/DispatchStatus'
 
 /*********************************************
  * 📂 Category: Interface
- * 🔧 Defines: 角色狀態顯示資料
+ * 🔧 Defines: 定義元件內使用的自訂 TypeScript 型別
  *********************************************/
 export interface RoleStatusInfo {
   text: string
@@ -18,7 +18,7 @@ export interface RoleStatusInfo {
 
 /*********************************************
  * 📂 Category: Static Data
- * 🔧 Defines: dispatch status 對應的顯示資料
+ * 🔧 Defines: 不會改變的靜態資料，例如選單、enum 對應等
  *********************************************/
 const waitingStatus: RoleStatusInfo = { text: '等待中', icon: '◷', className: 'is-waiting', running: false }
 
@@ -37,7 +37,7 @@ const unknownStatus: RoleStatusInfo = { text: '資料未提供', icon: '?', clas
 
 /*********************************************
  * 📂 Category: Methods
- * 🔧 Defines: 將 raw status 轉成角色顯示資料
+ * 🔧 Defines: 定義函數與事件處理
  *********************************************/
 export const getRoleStatusInfo = (value?: string): RoleStatusInfo => {
   if (!value) return unknownStatus

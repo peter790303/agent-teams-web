@@ -17,7 +17,7 @@
 
   /*********************************************
    * 📂 Category: Computed
-   * 🔧 Defines: 員工工作站的顯示資料
+   * 🔧 Defines: 定義計算屬性
    *********************************************/
   const employees = computed(() =>
     roles.map((person) => ({
@@ -29,7 +29,7 @@
 
   /*********************************************
    * 📂 Category: Methods
-   * 🔧 Defines: 角色選取事件
+   * 🔧 Defines: 定義函數與事件處理
    *********************************************/
   const selectRole = (id: string): void => props.onRole(id)
 </script>
