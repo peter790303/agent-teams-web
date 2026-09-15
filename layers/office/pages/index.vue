@@ -22,21 +22,21 @@ const { tasks, roleStatuses, error, load, create } = useOffice()
 
 /*********************************************
  * 📂 Category: Refs / Reactive State
- * 🔧 Defines: 頁面互動狀態
+ * 🔧 Defines: 元件中的 ref, reactive 等可變資料狀態
  *********************************************/
 const purpose = ref<string>('')
 const projectId = ref<string>('default')
 
 /*********************************************
  * 📂 Category: Computed
- * 🔧 Defines: 由狀態推導的顯示資料
+ * 🔧 Defines: 定義計算屬性
  *********************************************/
 const systemStatus = computed(() => Object.keys(roleStatuses.value).length > 0 ? 'API 已連線' : '未知')
 const taskLinks = computed(() => tasks.value.map((task) => ({ ...task, href: `/office/tasks/${task.id}` })))
 
 /*********************************************
  * 📂 Category: Methods
- * 🔧 Defines: 頁面事件與資料操作
+ * 🔧 Defines: 定義函數與事件處理
  *********************************************/
 const submit = async (): Promise<void> => {
   if (!purpose.value.trim()) return
@@ -50,7 +50,7 @@ const submit = async (): Promise<void> => {
 
 /*********************************************
  * 📂 Category: Lifecycle Hooks
- * 🔧 Defines: 頁面生命週期處理
+ * 🔧 Defines: Vue 生命週期 hook —— onMounted、onUnmounted 等
  *********************************************/
 onMounted(load)
 </script>

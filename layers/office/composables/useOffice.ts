@@ -18,10 +18,6 @@ interface SubmitTaskCommand { id: string; worktree: string; commit: string; gate
  *********************************************/
 const statusLabel = (status: string): string => ({ running: '執行中', active: '執行中', completed: '已完成', succeeded: '已完成', failed: '失敗', blocked: '已阻塞', pending: '等待中' })[status.toLowerCase()] ?? status
 
-/*********************************************
- * 📂 Category: Methods
- * 🔧 Defines: 定義函數與事件處理
- *********************************************/
 export function useOffice() {
 
 /*********************************************
