@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useOffice } from '~/layers/office/composables/useOffice'
 
-// Category: page state and API view model
+// 📂 Category: page state and API view model
 const route = useRoute()
 const { getState, getIntervention, resumeTask, submitTask } = useOffice()
 const state = ref<Awaited<ReturnType<typeof getState>> | null>(null)
@@ -14,6 +14,8 @@ const failedReviewRounds = ref<number>(0)
 const extraReviewRoundAllowance = ref<string>('')
 const status = ref<string>('')
 const error = ref<string>('')
+const submitting = ref<boolean>(false)
+const submitKey = ref<string>(crypto.randomUUID())
 const taskId = String(route.params.id)
 type DispatchView = Awaited<ReturnType<typeof getState>>['data']['dispatches'][number]
 interface InterventionView { status?: string; editable?: boolean; role?: string; round?: number; branch?: string; worktree?: string; commit?: string; evidence?: unknown; diagnostics?: unknown; failedReviewRounds?: number; extraReviewRoundAllowance?: string }
@@ -41,12 +43,24 @@ onMounted(async (): Promise<void> => {
     const data = intervention.value?.data as InterventionView | null | undefined
     worktree.value = data?.worktree ?? ''
     commit.value = data?.commit ?? ''
-    failedReviewRounds.value = data?.failedReviewRounds ?? 0
+    failedReviewRounds.value = data?.round ?? 0
     extraReviewRoundAllowance.value = data?.extraReviewRoundAllowance ?? ''
   } catch { error.value = '人工接手狀態載入失敗' }
 })
-const resume = async (): Promise<void> => { try { await resumeTask(taskId, instruction.value, worktree.value, failedReviewRounds.value, extraReviewRoundAllowance.value); status.value = '已送出接手指令' } catch { error.value = '接手指令送出失敗' } }
-const submit = async (): Promise<void> => { try { await submitTask(taskId, worktree.value, commit.value, gate.value, crypto.randomUUID()); status.value = '已送出交付驗收' } catch { error.value = '交付驗收送出失敗' } }
+const resume = async (): Promise<void> => {
+  if (submitting.value) return
+  submitting.value = true
+  try { await resumeTask({ id: taskId, instruction: instruction.value, worktree: worktree.value, failedReviewRounds: failedReviewRounds.value, extraReviewRoundAllowance: extraReviewRoundAllowance.value }); status.value = '已送出接手指令'; state.value = await getState(taskId); intervention.value = await getIntervention(taskId) }
+  catch { error.value = '接手指令送出失敗' }
+  finally { submitting.value = false }
+}
+const submit = async (): Promise<void> => {
+  if (submitting.value) return
+  submitting.value = true
+  try { await submitTask({ id: taskId, worktree: worktree.value, commit: commit.value, gate: gate.value, idempotencyKey: submitKey.value }); status.value = '已送出交付驗收'; state.value = await getState(taskId); intervention.value = await getIntervention(taskId) }
+  catch { error.value = '交付驗收送出失敗' }
+  finally { submitting.value = false }
+}
 </script>
 
 <template>

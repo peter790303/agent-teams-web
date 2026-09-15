@@ -4,7 +4,7 @@ import CommandCenter from '~/layers/office/components/office/CommandCenter.vue'
 import PixelOfficeMap from '~/layers/office/components/office/PixelOfficeMap.vue'
 import WorkstationRoster from '~/layers/office/components/office/WorkstationRoster.vue'
 
-// Category: page view model
+// 📂 Category: page view model
 const { tasks, roleStatuses, error, load, create } = useOffice()
 const purpose = ref<string>('')
 const projectId = ref<string>('default')
