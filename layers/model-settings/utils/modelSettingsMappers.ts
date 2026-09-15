@@ -64,7 +64,8 @@ const fromDraft = (draft: CandidateDraft): ModelCandidate => {
   }
 }
 
-const modelKey = (model: Pick<ModelCandidate, 'providerId' | 'modelId'>): string => `${model.providerId}:${model.modelId}`
+const modelKey = (model: Pick<ModelCandidate, 'providerId' | 'modelId'>): string =>
+  `${model.providerId}:${model.modelId}`
 
 const toPolicyPayload = (whitelist: ModelCandidate[], minQualityScore: number): SavePolicyPayload => ({
   minQualityScore,

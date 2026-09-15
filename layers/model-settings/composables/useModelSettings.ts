@@ -6,7 +6,15 @@
 import { MODEL_ROLES } from '~/layers/domain/types'
 
 import { getCapacities, getCatalog, getHealth, getPolicy, savePolicy } from '../repositories'
-import type { Capacity, HealthEntry, ModelCatalog, ModelSettingsComposable, ModelCandidate, PolicyEditor, Role } from '../types'
+import type {
+  Capacity,
+  HealthEntry,
+  ModelCatalog,
+  ModelSettingsComposable,
+  ModelCandidate,
+  PolicyEditor,
+  Role,
+} from '../types'
 import { useModelSettingsMappers } from '../utils/modelSettingsMappers'
 
 /*********************************************
@@ -93,7 +101,9 @@ export const useModelSettings = (): ModelSettingsComposable => {
             updatedAt: data.updatedAt,
             candidates: data.whitelist,
             selectedIds: data.whitelist.map(modelKey),
-            candidateDrafts: Object.fromEntries(data.whitelist.map((candidate) => [modelKey(candidate), candidateDraft(candidate)])),
+            candidateDrafts: Object.fromEntries(
+              data.whitelist.map((candidate) => [modelKey(candidate), candidateDraft(candidate)])
+            ),
           }
         }
 
@@ -110,7 +120,8 @@ export const useModelSettings = (): ModelSettingsComposable => {
     }
     if (capacityResult.status === 'fulfilled') capacities.value = capacityResult.value
     if (healthResult.status === 'fulfilled') health.value = healthResult.value
-    if (capacityResult.status === 'rejected' || healthResult.status === 'rejected') error.value = '部分監控資料暫時無法載入'
+    if (capacityResult.status === 'rejected' || healthResult.status === 'rejected')
+      error.value = '部分監控資料暫時無法載入'
   }
 
   const addCandidate = (editor: PolicyEditor): void => {
