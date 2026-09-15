@@ -6,13 +6,19 @@
     "dev": "nuxt dev --port 30679",
     "build": "nuxt build",
     "typecheck": "nuxt typecheck",
-    "lint": "nuxt prepare && eslint ."
+    "lint": "nuxt prepare && eslint .",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
   },
   "devDependencies": {
     "@nuxt/eslint": "^1.17.0",
     "@types/node": "^22.20.2",
     "eslint": "^10.10.0",
+    "eslint-config-prettier": "^10.1.8",
     "nuxt": "^3.17.0",
+    "prettier": "^3.6.2",
+    "eslint-config-prettier": "^10.1.8",
+    "prettier": "^3.9.6",
     "typescript": "^5.9.3",
     "vite-plugin-vuetify": "^2.1.3",
     "vue-tsc": "^2.2.10"

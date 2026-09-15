@@ -1,5 +1,8 @@
 <script setup lang="ts">
+  import { computed } from 'vue'
+
   import { avatar, roles } from '~/layers/office/assets/originalOffice'
+
   const props = defineProps<{ roleStatuses: Record<string, string> }>()
   const emit = defineEmits<{ role: [id: string] }>()
   const status = (value?: string): string =>
@@ -11,6 +14,15 @@
           ? '● 等待中'
           : `● ${value}`
   const running = (value?: string): boolean => Boolean(value && /running|執行中|active/i.test(value))
+  const employees = computed(() =>
+    roles.map((person) => ({
+      ...person,
+      active: running(props.roleStatuses[person.id]),
+      avatarSvg: avatar(person.color, person.id === 'pm' || person.id === 'qa' ? '#624633' : '#383630'),
+      statusText: status(props.roleStatuses[person.id]),
+    }))
+  )
+  const selectRole = (id: string): void => emit('role', id)
 </script>
 <template>
   <section class="roster" aria-label="團隊工作站">
@@ -20,20 +32,17 @@
     </div>
     <div class="employees">
       <button
-        v-for="person in roles"
+        v-for="person in employees"
         :key="person.id"
         class="employee"
-        :class="{ 'is-active': running(props.roleStatuses[person.id]) }"
+        :class="{ 'is-active': person.active }"
         type="button"
-        @click="emit('role', person.id)"
+        @click="selectRole(person.id)"
       >
-        <span
-          class="employee-avatar"
-          v-html="avatar(person.color, person.id === 'pm' || person.id === 'qa' ? '#624633' : '#383630')"
-        /><span
+        <span class="employee-avatar" v-html="person.avatarSvg" /><span
           ><strong>{{ person.name }}</strong
           ><small>{{ person.en }}</small
-          ><span class="state">{{ status(props.roleStatuses[person.id]) }}</span></span
+          ><span class="state">{{ person.statusText }}</span></span
         >
       </button>
     </div>
