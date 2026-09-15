@@ -11,16 +11,21 @@ export function useOffice() {
   const taskStates = useState<TaskState[]>('task-states', () => [])
   const error = useState<string | null>('tasks-error', () => null)
   const load = async (): Promise<void> => {
-    try { tasks.value = (await listTasks()).data; error.value = null }
-    catch (reason) { error.value = reason instanceof Error ? reason.message : '載入任務失敗' }
+    const taskResult = await listTasks()
+    if (taskResult.data) { tasks.value = taskResult.data; error.value = null } else error.value = taskResult.error ?? '載入任務失敗'
     const states = await Promise.allSettled(tasks.value.map((task) => getTaskState({ id: task.id })))
-    taskStates.value = states.flatMap((result) => result.status === 'fulfilled' ? [result.value] : [])
+    taskStates.value = states.flatMap((result) => result.status === 'fulfilled' && result.value.data ? [result.value.data] : [])
   }
   const create = async (purpose: string, projectId: string): Promise<void> => {
-    try { await createTask({ purpose, projectId }); await load() }
-    catch (reason) { error.value = reason instanceof Error ? reason.message : '建立任務失敗'; throw reason }
+    const result = await createTask({ purpose, projectId })
+    if (result.data) await load()
+    else error.value = result.error ?? '建立任務失敗'
   }
-  const getState = (id: string): Promise<TaskState> => getTaskState({ id })
+  const getState = async (id: string): Promise<TaskState> => {
+    const result = await getTaskState({ id })
+    if (result.data) return result.data
+    throw new Error(result.error ?? '載入任務狀態失敗')
+  }
   const roleStatuses = computed<Record<string, string>>(() => taskStates.value.reduce<Record<string, string>>((statuses, state) => {
     state.data.dispatches.forEach((dispatch) => {
       const next = statusLabel(dispatch.status)
@@ -31,7 +36,8 @@ export function useOffice() {
     })
     return statuses
   }, {}))
-  const resumeWithReviewContext = (command: ResumeTaskCommand): Promise<unknown> => resumeTask(command)
-  const submitWithKey = (command: SubmitTaskCommand): Promise<unknown> => submitTask(command)
-  return { tasks, taskStates, roleStatuses, error, load, create, getState, getIntervention: (id: string) => getIntervention({ id }), resumeTask: resumeWithReviewContext, submitTask: submitWithKey }
+  const resumeWithReviewContext = async (command: ResumeTaskCommand): Promise<void> => { const result = await resumeTask(command); if (!result.data) throw new Error(result.error ?? '接手任務失敗') }
+  const submitWithKey = async (command: SubmitTaskCommand): Promise<void> => { const result = await submitTask(command); if (!result.data) throw new Error(result.error ?? '提交任務失敗') }
+  const intervention = async (id: string): Promise<{ data: import('~/layers/office/types').Intervention | null }> => { const result = await getIntervention({ id }); if (result.error) throw new Error(result.error); return { data: result.data } }
+  return { tasks, taskStates, roleStatuses, error, load, create, getState, getIntervention: intervention, resumeTask: resumeWithReviewContext, submitTask: submitWithKey }
 }

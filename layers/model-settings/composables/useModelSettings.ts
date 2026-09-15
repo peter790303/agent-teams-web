@@ -1,10 +1,11 @@
 import { getCapacities, getHealth, getPolicy, savePolicy } from '../repositories'
 import type { Capacity, HealthEntry, ModelCandidate, Role } from '../types'
+import { MODEL_ROLES } from '~/layers/domain/types'
 
 export interface CandidateDraft { providerId: string; modelId: string; capabilities: string; qualityScore: string; costScore: string; latencyScore: string }
 export interface PolicyEditor { role: Role; minQualityScore: string; version: number; updatedAt: string; candidates: ModelCandidate[]; selectedIds: string[]; candidateDrafts: Record<string, CandidateDraft>; draft: CandidateDraft; loadError?: string; validationError?: string }
 
-const roles: Role[] = ['leader', 'pm', 'rd_leader', 'rd', 'qa']
+const roles: readonly Role[] = MODEL_ROLES
 const blank = (): CandidateDraft => ({ providerId: '', modelId: '', capabilities: 'code', qualityScore: '0', costScore: '0', latencyScore: '0' })
 const id = (model: Pick<ModelCandidate, 'providerId' | 'modelId'>): string => `${model.providerId}:${model.modelId}`
 const candidateDraft = (candidate: ModelCandidate): CandidateDraft => ({ providerId: candidate.providerId, modelId: candidate.modelId, capabilities: candidate.capabilities.join(', '), qualityScore: String(candidate.qualityScore), costScore: String(candidate.costScore), latencyScore: String(candidate.latencyScore) })
