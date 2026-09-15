@@ -1,5 +1,7 @@
-export type Role = 'leader' | 'pm' | 'rd_leader' | 'rd' | 'qa'
-export interface Task { id: string; purpose: string; projectId: string; stage: string; createdAt?: string; updatedAt?: string }
+export type { Role } from '~/layers/domain/types'
+export type { Task } from '~/layers/domain/task/Task'
+import type { Role } from '~/layers/domain/types'
+import type { Task } from '~/layers/domain/task/Task'
 export interface Dispatch { id: string; role: string; status: string; blockedReasons: string[]; dependencies: string[]; updatedAt: string }
 export interface TaskStateData { task: Task; revision: number; stage: string; activity: string; dispatches: Dispatch[]; executions: Record<string, unknown>[]; spec: Record<string, unknown> | null; plan: Record<string, unknown> | null; workspace: Record<string, unknown> | null; qaReport: Record<string, unknown> | null; delivery: Record<string, unknown> | null }
 export interface TaskState { data: TaskStateData }

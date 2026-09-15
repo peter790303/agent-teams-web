@@ -3,4 +3,6 @@ export interface Task {
   purpose: string
   projectId: string
   stage: string
+  createdAt?: string
+  updatedAt?: string
 }
