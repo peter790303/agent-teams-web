@@ -10,6 +10,7 @@
   import PixelOfficeMap from '~/layers/office/components/office/PixelOfficeMap.vue'
   import WorkstationRoster from '~/layers/office/components/office/WorkstationRoster.vue'
   import { useOffice } from '~/layers/office/composables/useOffice'
+  import { getRoleStatusInfo } from '~/layers/office/utils/dispatchStatus'
 
   /*********************************************
    * 📂 Category: Page Meta  (Nuxt only)
@@ -86,7 +87,7 @@
       if (!visible) closeRole()
     },
   })
-  const roleState = computed(() => roleStatuses.value[selectedRoleId.value ?? ''] ?? '資料未提供')
+  const roleState = computed(() => getRoleStatusInfo(roleStatuses.value[selectedRoleId.value ?? '']).text)
   const roleTaskText = computed(() =>
     tasks.value.length
       ? `目前共有 ${tasks.value.length} 筆任務，角色狀態：${roleState.value}。`

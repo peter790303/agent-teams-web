@@ -5,6 +5,7 @@
 import type { ComputedRef, Ref } from 'vue'
 
 import type { Task } from '~/layers/domain/task/Task'
+import type { DispatchStatus } from '~/layers/domain/task/types/DispatchStatus'
 
 /*********************************************
  * 📂 Category: Interface
@@ -15,7 +16,7 @@ export type { Task } from '~/layers/domain/task/Task'
 export interface Dispatch {
   id: string
   role: string
-  status: string
+  status: DispatchStatus
   blockedReasons: string[]
   dependencies: string[]
   updatedAt: string
@@ -85,7 +86,7 @@ export interface OfficeComposable {
   tasks: Ref<Task[]>
   taskLoadStatus: Ref<'idle' | 'loading' | 'success' | 'error'>
   taskStates: Ref<TaskState[]>
-  roleStatuses: ComputedRef<Record<string, string>>
+  roleStatuses: ComputedRef<Record<string, DispatchStatus>>
   error: Ref<string | null>
   load: () => Promise<void>
   create: (purpose: string, projectId: string) => Promise<void>

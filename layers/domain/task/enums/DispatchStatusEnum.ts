@@ -1,4 +1,7 @@
-/** Dispatch lifecycle values returned by the Nest scheduler. */
+/*********************************************
+ * 📂 Category: Static Data
+ * 🔧 Defines: Nest scheduler 回傳的 dispatch lifecycle enum
+ *********************************************/
 export enum DispatchStatusEnum {
   PENDING = 'pending',
   WAITING_DEPENDENCY = 'waiting_dependency',
@@ -9,5 +12,3 @@ export enum DispatchStatusEnum {
   FAILED = 'failed',
   CANCELLED = 'cancelled',
 }
-
-export type DispatchStatus = `${DispatchStatusEnum}`

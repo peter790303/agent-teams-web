@@ -5,6 +5,7 @@
    *********************************************/
   import { computed } from 'vue'
 
+  import type { DispatchStatus } from '~/layers/domain/task/types/DispatchStatus'
   import { avatar, roles } from '~/layers/office/assets/originalOffice'
   import { getRoleStatusInfo } from '~/layers/office/utils/dispatchStatus'
 
@@ -12,7 +13,12 @@
    * 📂 Category: Props / Emits
    * 🔧 Defines: 定義元件接收的 props 或 emits 事件
    *********************************************/
-  const props = defineProps<{ roleStatuses: Record<string, string>; onRole: (id: string) => void }>()
+  const props = defineProps<{ roleStatuses: Record<string, DispatchStatus>; onRole: (id: string) => void }>()
+
+  /*********************************************
+   * 📂 Category: Computed
+   * 🔧 Defines: 員工工作站的顯示資料
+   *********************************************/
   const employees = computed(() =>
     roles.map((person) => ({
       ...person,
@@ -20,6 +26,11 @@
       avatarSvg: avatar(person.color, person.id === 'pm' || person.id === 'qa' ? '#624633' : '#383630'),
     }))
   )
+
+  /*********************************************
+   * 📂 Category: Methods
+   * 🔧 Defines: 角色選取事件
+   *********************************************/
   const selectRole = (id: string): void => props.onRole(id)
 </script>
 <template>

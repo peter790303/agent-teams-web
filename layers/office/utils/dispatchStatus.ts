@@ -1,5 +1,14 @@
-import { DispatchStatusEnum, type DispatchStatus } from '~/layers/domain/task/enums/DispatchStatusEnum'
+/*********************************************
+ * 📂 Category: Imports
+ * 🔧 Defines: 引入 dispatch status 與角色狀態型別
+ *********************************************/
+import { DispatchStatusEnum } from '~/layers/domain/task/enums/DispatchStatusEnum'
+import type { DispatchStatus } from '~/layers/domain/task/types/DispatchStatus'
 
+/*********************************************
+ * 📂 Category: Interface
+ * 🔧 Defines: 角色狀態顯示資料
+ *********************************************/
 export interface RoleStatusInfo {
   text: string
   icon: string
@@ -7,10 +16,16 @@ export interface RoleStatusInfo {
   running: boolean
 }
 
+/*********************************************
+ * 📂 Category: Static Data
+ * 🔧 Defines: dispatch status 對應的顯示資料
+ *********************************************/
+const waitingStatus: RoleStatusInfo = { text: '等待中', icon: '◷', className: 'is-waiting', running: false }
+
 const statusInfo: Record<DispatchStatus, RoleStatusInfo> = {
-  [DispatchStatusEnum.PENDING]: { text: '等待中', icon: '◷', className: 'is-waiting', running: false },
-  [DispatchStatusEnum.WAITING_DEPENDENCY]: { text: '等待中', icon: '◷', className: 'is-waiting', running: false },
-  [DispatchStatusEnum.WAITING_CAPACITY]: { text: '等待中', icon: '◷', className: 'is-waiting', running: false },
+  [DispatchStatusEnum.PENDING]: waitingStatus,
+  [DispatchStatusEnum.WAITING_DEPENDENCY]: waitingStatus,
+  [DispatchStatusEnum.WAITING_CAPACITY]: waitingStatus,
   [DispatchStatusEnum.WAITING_BLOCKER]: { text: '已阻塞', icon: '!', className: 'is-blocked', running: false },
   [DispatchStatusEnum.DISPATCHED]: { text: '工作中', icon: '●', className: 'is-running', running: true },
   [DispatchStatusEnum.COMPLETED]: { text: '已完成', icon: '✓', className: 'is-completed', running: false },
@@ -20,8 +35,14 @@ const statusInfo: Record<DispatchStatus, RoleStatusInfo> = {
 
 const unknownStatus: RoleStatusInfo = { text: '資料未提供', icon: '?', className: 'is-unknown', running: false }
 
+/*********************************************
+ * 📂 Category: Methods
+ * 🔧 Defines: 將 raw status 轉成角色顯示資料
+ *********************************************/
 export const getRoleStatusInfo = (value?: string): RoleStatusInfo => {
   if (!value) return unknownStatus
 
-  return statusInfo[value as DispatchStatus] ?? { ...unknownStatus, text: value }
+  const matched = Object.entries(statusInfo).find(([status]) => status === value)?.[1]
+
+  return matched ?? { ...unknownStatus, text: value }
 }

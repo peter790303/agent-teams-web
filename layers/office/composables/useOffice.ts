@@ -3,6 +3,7 @@
  * 🔧 Defines: 引入必要的模組和庫
  *********************************************/
 import { DispatchStatusEnum } from '~/layers/domain/task/enums/DispatchStatusEnum'
+import type { DispatchStatus } from '~/layers/domain/task/types/DispatchStatus'
 import {
   createTask,
   getIntervention,
@@ -19,12 +20,7 @@ import type {
   Task,
   TaskState,
 } from '~/layers/office/types'
-import { getRoleStatusInfo } from '~/layers/office/utils/dispatchStatus'
 
-/*********************************************
- * 📂 Category: Static Data
- * 🔧 Defines: 不會改變的靜態資料，例如選單、enum 對應等
- *********************************************/
 export const useOffice = (): OfficeComposable => {
   /*********************************************
    * 📂 Category: Refs / Reactive State
@@ -39,14 +35,13 @@ export const useOffice = (): OfficeComposable => {
    * 📂 Category: Computed
    * 🔧 Defines: 定義計算屬性
    *********************************************/
-  const roleStatuses = computed<Record<string, string>>(() =>
-    taskStates.value.reduce<Record<string, string>>((statuses, state) => {
-      return state.data.dispatches.reduce<Record<string, string>>((nextStatuses, dispatch) => {
-        const next = getRoleStatusInfo(dispatch.status).text
+  const roleStatuses = computed<Record<string, DispatchStatus>>(() =>
+    taskStates.value.reduce<Record<string, DispatchStatus>>((statuses, state) => {
+      return state.data.dispatches.reduce<Record<string, DispatchStatus>>((nextStatuses, dispatch) => {
+        const next = dispatch.status
         const previous = nextStatuses[dispatch.role]
         const running = dispatch.status === DispatchStatusEnum.DISPATCHED
-        const previousRunning =
-          previous !== undefined && previous === getRoleStatusInfo(DispatchStatusEnum.DISPATCHED).text
+        const previousRunning = previous === DispatchStatusEnum.DISPATCHED
         if (previous === undefined || running || !previousRunning) nextStatuses[dispatch.role] = next
 
         return nextStatuses
