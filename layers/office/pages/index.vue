@@ -68,7 +68,7 @@ onUnmounted(() => { if (clockTimer) clearInterval(clockTimer) })
 <template>
   <BasePageLayout>
     <main class="shell">
-      <header class="office-header"><div class="brand"><span class="brand-mark">▦</span><div><h1>AI OFFICE <small>v0.1.0</small></h1><p>智能協作指揮中心</p></div></div><div class="header-meta"><span class="clock">☀ {{ clockText }} <small>{{ dateText }}</small></span><span class="health"><i /> 系統狀態：{{ systemStatus }}</span><span class="supervisor"><b>AI</b> 主控模式</span></div></header>
+      <header class="office-header"><div class="brand"><span class="brand-mark">▦</span><div><h1>AI OFFICE <small>v0.1.0</small></h1><p>智能協作指揮中心</p></div></div><div class="header-meta"><span class="clock">☀ {{ clockText }} <small>{{ dateText }}</small></span><span class="health" :class="{ 'is-unknown': systemStatus === '資料未提供' }"><i /> 系統狀態：{{ systemStatus }}</span><span class="supervisor"><b>AI</b> 主控模式</span></div></header>
       <v-row class="workspace" :class="{ 'is-narrow': mdAndDown }">
         <v-col cols="12" md="8"><PixelOfficeMap :role-statuses="roleStatuses" /></v-col>
         <v-col cols="12" md="4"><CommandCenter :tasks="tasks" :activities="activities" /></v-col>
