@@ -5,6 +5,10 @@
    *********************************************/
   import type { Task } from '~/layers/office/types'
 
+  /*********************************************
+   * 📂 Category: Interfaces / Types
+   * 🔧 Defines: 指揮中心統計資料型別
+   *********************************************/
   type CommandStats = {
     completed: number
     waiting: number
