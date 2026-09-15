@@ -7,5 +7,6 @@ const people = [
   { name: '自動化小林', role: 'Automation', status: '等待審核', icon: '👨🏻‍💻' },
   { name: '測試小美', role: 'Testing', status: '工作中', icon: '👩🏻‍💻' },
   { name: '設計小花', role: 'Design', status: '工作中', icon: '👩🏻‍💻' },
+  { name: 'QA', role: 'qa', status: '待命', icon: '👩🏻‍🔬' },
 ]
 </script>

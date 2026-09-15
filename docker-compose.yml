@@ -4,8 +4,8 @@ services:
       context: .
       dockerfile: docker/22/Dockerfile
     ports:
-      - "30679:3000"
+      - "127.0.0.1:30679:3000"
     environment:
-      BACKEND_ORIGIN: http://host.docker.internal:30678
+      NUXT_PUBLIC_API_BASE: http://host.docker.internal:30678
     extra_hosts:
       - "host.docker.internal:host-gateway"
