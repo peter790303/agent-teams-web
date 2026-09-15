@@ -16,11 +16,22 @@
    * 🔧 Defines: 目前指揮中心分頁
    *********************************************/
   const tab = ref<'overview' | 'tasks' | 'activity' | 'settings'>('overview')
+  const hasTaskData = computed(() => props.tasks.length > 0)
   const stats = computed(() => ({
-    completed: props.tasks.filter((task) => /completed|succeeded|完成/i.test(task.stage)).length,
-    waiting: props.tasks.filter((task) => /pending|等待|queued/i.test(task.stage)).length,
-    running: props.tasks.filter((task) => /running|active|執行中/i.test(task.stage)).length,
+    completed: hasTaskData.value
+      ? props.tasks.filter((task) => /completed|succeeded|完成/i.test(task.stage)).length
+      : '資料未提供',
+    waiting: hasTaskData.value
+      ? props.tasks.filter((task) => /pending|等待|queued/i.test(task.stage)).length
+      : '資料未提供',
+    failed: hasTaskData.value
+      ? props.tasks.filter((task) => /failed|失敗|error/i.test(task.stage)).length
+      : '資料未提供',
+    running: hasTaskData.value
+      ? props.tasks.filter((task) => /running|active|執行中/i.test(task.stage)).length
+      : '資料未提供',
   }))
+  const pendingTasks = computed(() => props.tasks.filter((task) => /pending|等待|queued/i.test(task.stage)))
   const feed = computed(() =>
     props.activities.length
       ? props.activities
@@ -44,7 +55,7 @@
         </div>
         <div class="feed">
           <div v-for="(item, index) in feed" :key="`${item}-${index}`" class="event">
-            <time>—</time>
+            <time>資料未提供</time>
             <p>{{ item }}</p>
           </div>
           <div v-if="!feed.length" class="empty">
@@ -53,7 +64,7 @@
         </div>
       </section>
       <section class="command-section">
-        <h2>今日統計</h2>
+        <h2>最新任務統計</h2>
         <div class="stat-grid">
           <div>
             <strong>{{ stats.completed }}</strong
@@ -63,7 +74,10 @@
             <strong>{{ stats.waiting }}</strong
             ><small>等待處理</small>
           </div>
-          <div><strong>—</strong><small>錯誤</small></div>
+          <div>
+            <strong>{{ stats.failed }}</strong
+            ><small>錯誤</small>
+          </div>
           <div>
             <strong>{{ stats.running }}</strong
             ><small>運行中</small>
@@ -71,8 +85,19 @@
         </div>
       </section>
       <section class="command-section">
+        <h2>待處理</h2>
+        <div class="task-list">
+          <NuxtLink v-for="task in pendingTasks" :key="task.id" class="task-item" :to="`/office/tasks/${task.id}`">
+            <strong>{{ task.purpose }}</strong
+            ><small>{{ task.stage }}</small>
+          </NuxtLink>
+          <p v-if="!hasTaskData" class="empty">資料未提供</p>
+          <p v-else-if="!pendingTasks.length" class="empty">目前沒有待處理任務</p>
+        </div>
+      </section>
+      <section class="command-section">
         <h2>系統資源</h2>
-        <p class="notice">目前 API 未提供即時資源數值</p>
+        <p class="notice">資料未提供</p>
       </section>
     </template>
     <section v-else-if="tab === 'activity'" class="command-section">
@@ -82,7 +107,7 @@
       </div>
       <div class="feed">
         <div v-for="(item, index) in feed" :key="`${item}-${index}`" class="event">
-          <time>—</time>
+          <time>資料未提供</time>
           <p>{{ item }}</p>
         </div>
       </div>

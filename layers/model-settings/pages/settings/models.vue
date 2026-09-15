@@ -4,7 +4,7 @@
    * 🔧 Defines: 引入必要的模組和庫
    *********************************************/
   import { useModelSettings } from '~/layers/model-settings/composables/useModelSettings'
-  import type { HealthEntry } from '~/layers/model-settings/types'
+  import type { HealthEntry, ModelCatalog } from '~/layers/model-settings/types'
 
   /*********************************************
    * 📂 Category: Page Meta  (Nuxt only)
@@ -33,6 +33,7 @@
     toggle,
     save,
     id,
+    catalogId,
   } = useModelSettings()
 
   /*********************************************
@@ -41,6 +42,13 @@
    *********************************************/
   const candidateLabel = (candidate: { providerId: string; modelId: string }): string =>
     `${candidate.providerId}/${candidate.modelId}`
+  const catalogItems = computed(() =>
+    catalog.value.map((candidate: ModelCatalog) => ({
+      ...candidate,
+      key: catalogId(candidate),
+      label: candidateLabel(candidate),
+    }))
+  )
   const healthRows = computed(() =>
     health.value.map((entry: HealthEntry) => ({
       ...entry,
@@ -93,11 +101,11 @@
             </ul>
             <form @submit.prevent="addCandidate(editor)">
               <v-select
-                v-model="editor.draft.modelId"
+                :model-value="catalogId(editor.draft)"
                 label="Provider 支援模型"
-                :items="catalog"
-                item-title="modelId"
-                item-value="modelId"
+                :items="catalogItems"
+                item-title="label"
+                item-value="key"
                 :loading="catalogState === 'pending'"
                 :disabled="catalogState !== 'loaded' || catalog.length === 0"
                 @update:model-value="selectCatalogModel(editor, $event)"

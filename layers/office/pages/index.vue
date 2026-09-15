@@ -86,11 +86,11 @@
       if (!visible) closeRole()
     },
   })
-  const roleState = computed(() => roleStatuses.value[selectedRoleId.value ?? ''] ?? '待命')
+  const roleState = computed(() => roleStatuses.value[selectedRoleId.value ?? ''] ?? '資料未提供')
   const roleTaskText = computed(() =>
     tasks.value.length
       ? `目前共有 ${tasks.value.length} 筆任務，角色狀態：${roleState.value}。`
-      : '尚未選取任務，角色目前待命。'
+      : '尚未選取任務，角色狀態資料未提供。'
   )
 
   /*********************************************

@@ -13,21 +13,24 @@
    *********************************************/
   const props = defineProps<{ roleStatuses: Record<string, string> }>()
   const emit = defineEmits<{ role: [id: string] }>()
-  const status = (value?: string): string =>
-    !value
-      ? '● 待命'
-      : /running|執行中|active/i.test(value)
-        ? '● 工作中'
-        : /pending|等待|queued/i.test(value)
-          ? '● 等待中'
-          : `● ${value}`
-  const running = (value?: string): boolean => Boolean(value && /running|執行中|active/i.test(value))
+  const statusInfo = (value?: string): { text: string; icon: string; className: string; running: boolean } => {
+    if (!value) return { text: '資料未提供', icon: '?', className: 'is-unknown', running: false }
+    if (/running|執行中|active/i.test(value))
+      return { text: '工作中', icon: '●', className: 'is-running', running: true }
+    if (/pending|等待|queued/i.test(value))
+      return { text: '等待中', icon: '◷', className: 'is-waiting', running: false }
+    if (/completed|succeeded|完成/i.test(value))
+      return { text: '已完成', icon: '✓', className: 'is-completed', running: false }
+    if (/failed|失敗/i.test(value)) return { text: '失敗', icon: '!', className: 'is-failed', running: false }
+    if (/blocked|阻塞/i.test(value)) return { text: '已阻塞', icon: '!', className: 'is-blocked', running: false }
+
+    return { text: value, icon: '?', className: 'is-unknown', running: false }
+  }
   const employees = computed(() =>
     roles.map((person) => ({
       ...person,
-      active: running(props.roleStatuses[person.id]),
+      ...statusInfo(props.roleStatuses[person.id]),
       avatarSvg: avatar(person.color, person.id === 'pm' || person.id === 'qa' ? '#624633' : '#383630'),
-      statusText: status(props.roleStatuses[person.id]),
     }))
   )
   const selectRole = (id: string): void => emit('role', id)
@@ -43,7 +46,7 @@
         v-for="person in employees"
         :key="person.id"
         class="employee"
-        :class="{ 'is-active': person.active }"
+        :class="{ 'is-active': person.running }"
         type="button"
         variant="text"
         density="compact"
@@ -52,7 +55,10 @@
         <span class="employee-avatar" v-html="person.avatarSvg" /><span
           ><strong>{{ person.name }}</strong
           ><small>{{ person.en }}</small
-          ><span class="state">{{ person.statusText }}</span></span
+          ><span class="state" :class="person.className"
+            ><span aria-hidden="true">{{ person.icon }}</span
+            >{{ person.text }}</span
+          ></span
         >
       </v-btn>
     </div>

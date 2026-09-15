@@ -13,23 +13,26 @@
    *********************************************/
   const props = defineProps<{ roleStatuses: Record<string, string> }>()
   const emit = defineEmits<{ role: [id: string] }>()
-  const statusLabel = (value?: string): string => {
-    if (!value) return '● 待命'
-    if (/running|執行中|active/i.test(value)) return '● 工作中'
-    if (/pending|等待|queued/i.test(value)) return '● 等待中'
-    if (/failed|失敗|blocked|阻塞/i.test(value)) return '● 需處理'
+  const statusInfo = (value?: string): { text: string; icon: string; className: string; running: boolean } => {
+    if (!value) return { text: '資料未提供', icon: '?', className: 'is-unknown', running: false }
+    if (/running|執行中|active/i.test(value))
+      return { text: '工作中', icon: '●', className: 'is-running', running: true }
+    if (/pending|等待|queued/i.test(value))
+      return { text: '等待中', icon: '◷', className: 'is-waiting', running: false }
+    if (/completed|succeeded|完成/i.test(value))
+      return { text: '已完成', icon: '✓', className: 'is-completed', running: false }
+    if (/failed|失敗/i.test(value)) return { text: '失敗', icon: '!', className: 'is-failed', running: false }
+    if (/blocked|阻塞/i.test(value)) return { text: '已阻塞', icon: '!', className: 'is-blocked', running: false }
 
-    return `● ${value}`
+    return { text: value, icon: '?', className: 'is-unknown', running: false }
   }
-  const isRunning = (value?: string): boolean => Boolean(value && /running|執行中|active/i.test(value))
   const people = computed(() =>
     roles.map((person) => ({
       ...person,
       style: { left: `${person.x}%`, top: `${person.y}%` },
       ariaLabel: `查看${person.name}`,
       hairColor: person.id === 'pm' || person.id === 'qa' ? '#624633' : '#383630',
-      running: isRunning(props.roleStatuses[person.id]),
-      status: statusLabel(props.roleStatuses[person.id]),
+      ...statusInfo(props.roleStatuses[person.id]),
     }))
   )
   const selectRole = (id: string): void => emit('role', id)
@@ -52,7 +55,11 @@
         >
           <span class="person-avatar" v-html="avatar(person.color, person.hairColor)" />
           <span class="person-label"
-            >{{ person.name }}<small :class="{ 'is-running': person.running }">{{ person.status }}</small></span
+            >{{ person.name
+            }}<small :class="person.className"
+              ><span aria-hidden="true">{{ person.icon }}</span
+              >{{ person.text }}</small
+            ></span
           >
         </v-btn>
       </div>
@@ -61,7 +68,7 @@
       <span>點選角色查看工作狀態與任務</span>
       <div class="legend">
         <span><i class="dot running" />工作中</span><span><i class="dot waiting" />等待中</span
-        ><span><i class="dot" />待命</span>
+        ><span><i class="dot unknown" />資料未提供</span>
       </div>
     </div>
   </section>

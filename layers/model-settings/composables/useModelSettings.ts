@@ -1,35 +1,21 @@
 import { MODEL_ROLES } from '~/layers/domain/types'
 
 import { getCapacities, getCatalog, getHealth, getPolicy, savePolicy } from '../repositories'
-import type { Capacity, HealthEntry, ModelCandidate, ModelCatalog, Role } from '../types'
+import type {
+  CandidateDraft,
+  Capacity,
+  HealthEntry,
+  ModelCandidate,
+  ModelCatalog,
+  ModelSettingsComposable,
+  PolicyEditor,
+  Role,
+} from '../types'
 
 /*********************************************
  * 📂 Category: Interfaces
  * 🔧 Defines: 模型設定頁面的表單與載入狀態
  *********************************************/
-
-export interface CandidateDraft {
-  providerId: string
-  modelId: string
-  capabilities: string
-  qualityScore: string
-  costScore: string
-  latencyScore: string
-}
-export type PolicyLoadState = 'pending' | 'loaded' | 'missing' | 'failed'
-export interface PolicyEditor {
-  role: Role
-  minQualityScore: string
-  version: number
-  updatedAt: string
-  candidates: ModelCandidate[]
-  selectedIds: string[]
-  candidateDrafts: Record<string, CandidateDraft>
-  draft: CandidateDraft
-  loadState: PolicyLoadState
-  loadError?: string
-  validationError?: string
-}
 
 const roles: readonly Role[] = MODEL_ROLES
 const blank = (): CandidateDraft => ({
@@ -41,6 +27,8 @@ const blank = (): CandidateDraft => ({
   latencyScore: '0',
 })
 const id = (model: Pick<ModelCandidate, 'providerId' | 'modelId'>): string => `${model.providerId}:${model.modelId}`
+const catalogId = (model: Pick<ModelCatalog, 'providerId' | 'modelId'>): string =>
+  `${model.providerId}:${model.modelId}`
 const candidateDraft = (candidate: ModelCandidate): CandidateDraft => ({
   providerId: candidate.providerId,
   modelId: candidate.modelId,
@@ -85,7 +73,7 @@ const createEditor = (role: Role): PolicyEditor => ({
   loadState: 'pending',
 })
 
-export function useModelSettings() {
+export const useModelSettings = (): ModelSettingsComposable => {
   const editors = ref<PolicyEditor[]>(roles.map(createEditor))
   const capacities = ref<Capacity[]>([])
   const health = ref<HealthEntry[]>([])
@@ -156,8 +144,8 @@ export function useModelSettings() {
       editor.validationError = reason instanceof Error ? reason.message : '候選模型資料無效'
     }
   }
-  const selectCatalogModel = (editor: PolicyEditor, modelId: string): void => {
-    const model = catalog.value.find((entry: ModelCatalog) => entry.modelId === modelId)
+  const selectCatalogModel = (editor: PolicyEditor, modelKey: string): void => {
+    const model = catalog.value.find((entry: ModelCatalog) => catalogId(entry) === modelKey)
     if (model) {
       editor.draft.providerId = model.providerId
       editor.draft.modelId = model.modelId
@@ -209,5 +197,6 @@ export function useModelSettings() {
     toggle,
     save,
     id,
+    catalogId,
   }
 }
