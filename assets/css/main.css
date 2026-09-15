@@ -535,9 +535,6 @@ button {
   background: rgb(var(--v-theme-surface-alt));
   border: 1px solid rgb(var(--v-theme-border));
 }
-.person span {
-  font-size: 27px;
-}
 .person strong,
 .person small {
   display: block;
@@ -869,6 +866,8 @@ th {
   align-items: center;
   flex-direction: column;
   z-index: 1;
+  min-height: 0;
+  line-height: 1;
 }
 .office-card .person-avatar {
   display: block;
@@ -892,6 +891,7 @@ th {
   white-space: nowrap;
   font-size: clamp(7px, 0.68vw, 10px);
   line-height: 1.35;
+  text-align: center;
 }
 .office-card .person-label small {
   display: block;
@@ -976,6 +976,8 @@ th {
   background: linear-gradient(135deg, #242c2c, #1a2022);
   padding: 12px 9px;
   text-align: left;
+  min-height: 72px;
+  overflow: hidden;
 }
 .roster .employee.is-active {
   border-color: #8eaa69;
@@ -998,6 +1000,8 @@ th {
 .roster .employee strong {
   font-size: 10px;
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .roster .employee small {
   font: 9px monospace;

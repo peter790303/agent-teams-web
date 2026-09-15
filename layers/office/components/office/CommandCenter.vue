@@ -16,20 +16,11 @@
    * 🔧 Defines: 目前指揮中心分頁
    *********************************************/
   const tab = ref<'overview' | 'tasks' | 'activity' | 'settings'>('overview')
-  const hasTaskData = computed(() => props.tasks.length > 0)
   const stats = computed(() => ({
-    completed: hasTaskData.value
-      ? props.tasks.filter((task) => /completed|succeeded|完成/i.test(task.stage)).length
-      : '資料未提供',
-    waiting: hasTaskData.value
-      ? props.tasks.filter((task) => /pending|等待|queued/i.test(task.stage)).length
-      : '資料未提供',
-    failed: hasTaskData.value
-      ? props.tasks.filter((task) => /failed|失敗|error/i.test(task.stage)).length
-      : '資料未提供',
-    running: hasTaskData.value
-      ? props.tasks.filter((task) => /running|active|執行中/i.test(task.stage)).length
-      : '資料未提供',
+    completed: props.tasks.filter((task) => /completed|succeeded|完成/i.test(task.stage)).length,
+    waiting: props.tasks.filter((task) => /pending|等待|queued/i.test(task.stage)).length,
+    failed: props.tasks.filter((task) => /failed|失敗|error/i.test(task.stage)).length,
+    running: props.tasks.filter((task) => /running|active|執行中/i.test(task.stage)).length,
   }))
   const pendingTasks = computed(() => props.tasks.filter((task) => /pending|等待|queued/i.test(task.stage)))
   const feed = computed(() =>
@@ -91,8 +82,7 @@
             <strong>{{ task.purpose }}</strong
             ><small>{{ task.stage }}</small>
           </NuxtLink>
-          <p v-if="!hasTaskData" class="empty">資料未提供</p>
-          <p v-else-if="!pendingTasks.length" class="empty">目前沒有待處理任務</p>
+          <p v-if="!pendingTasks.length" class="empty">目前沒有待處理任務</p>
         </div>
       </section>
       <section class="command-section">

@@ -20,10 +20,6 @@ import type {
 } from '~/layers/office/types'
 
 /*********************************************
- * 📂 Category: Interface
- * 🔧 Defines: 定義元件內使用的自訂 TypeScript 型別
- *********************************************/
-/*********************************************
  * 📂 Category: Static Data
  * 🔧 Defines: 不會改變的靜態資料，例如選單、enum 對應等
  *********************************************/
@@ -53,15 +49,15 @@ export const useOffice = (): OfficeComposable => {
    *********************************************/
   const roleStatuses = computed<Record<string, string>>(() =>
     taskStates.value.reduce<Record<string, string>>((statuses, state) => {
-      state.data.dispatches.forEach((dispatch) => {
+      return state.data.dispatches.reduce<Record<string, string>>((nextStatuses, dispatch) => {
         const next = statusLabel(dispatch.status)
-        const previous = statuses[dispatch.role]
+        const previous = nextStatuses[dispatch.role]
         const running = /running|執行中|active/i.test(dispatch.status)
         const previousRunning = previous !== undefined && /running|執行中|active/i.test(previous)
-        if (previous === undefined || running || !previousRunning) statuses[dispatch.role] = next
-      })
+        if (previous === undefined || running || !previousRunning) nextStatuses[dispatch.role] = next
 
-      return statuses
+        return nextStatuses
+      }, statuses)
     }, {})
   )
 

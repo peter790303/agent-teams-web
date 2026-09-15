@@ -1,5 +1,13 @@
+/*********************************************
+ * 📂 Category: Imports
+ * 🔧 Defines: 任務領域型別
+ *********************************************/
 import type { Task } from '../Task'
 
+/*********************************************
+ * 📂 Category: Interfaces
+ * 🔧 Defines: 任務 API 輸入型別
+ *********************************************/
 export interface TaskWire {
   id?: unknown
   purpose?: unknown
@@ -9,6 +17,10 @@ export interface TaskWire {
   updatedAt?: unknown
 }
 
+/*********************************************
+ * 📂 Category: Methods
+ * 🔧 Defines: 將 API 輸入轉為領域任務
+ *********************************************/
 const toTask = (input: TaskWire): Task => {
   return {
     id: String(input.id ?? ''),

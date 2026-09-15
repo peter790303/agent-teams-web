@@ -1,4 +1,13 @@
+/*********************************************
+ * 📂 Category: Imports
+ * 🔧 Defines: 模型領域型別
+ *********************************************/
 import type { Model } from '../Model'
+
+/*********************************************
+ * 📂 Category: Interfaces
+ * 🔧 Defines: 模型 API 輸入型別
+ *********************************************/
 export interface ModelCandidateWire {
   providerId?: unknown
   modelId?: unknown
@@ -8,6 +17,10 @@ export interface ModelCandidateWire {
   latencyScore?: unknown
 }
 
+/*********************************************
+ * 📂 Category: Methods
+ * 🔧 Defines: 將 API 輸入轉為領域模型
+ *********************************************/
 const toModel = (input: ModelCandidateWire): Model => {
   const numberOrZero = (value: unknown): number => (typeof value === 'number' && Number.isFinite(value) ? value : 0)
 
