@@ -24,13 +24,72 @@ import type {
 
 const roles: readonly Role[] = MODEL_ROLES
 
+/*********************************************
+ * 📂 Category: Methods
+ * 🔧 Defines: 模型設定資料的純轉換與建立函式
+ *********************************************/
+
+const createBlankDraft = (): CandidateDraft => ({
+  providerId: '',
+  modelId: '',
+  capabilities: '',
+  qualityScore: '',
+  costScore: '',
+  latencyScore: '',
+})
+const formatModelKey = (model: Pick<ModelCandidate, 'providerId' | 'modelId'>): string =>
+  `${model.providerId}:${model.modelId}`
+const convertCandidateToDraft = (candidate: ModelCandidate): CandidateDraft => ({
+  providerId: candidate.providerId,
+  modelId: candidate.modelId,
+  capabilities: candidate.capabilities.join(', '),
+  qualityScore: String(candidate.qualityScore),
+  costScore: String(candidate.costScore),
+  latencyScore: String(candidate.latencyScore),
+})
+const convertFiniteNumber = (value: string, label: string): number => {
+  if (value.trim() === '') throw new Error(`${label} 必須是有限數字`)
+  const parsed = Number(value)
+  if (!Number.isFinite(parsed)) throw new Error(`${label} 必須是有限數字`)
+
+  return parsed
+}
+const convertDraftToCandidate = (draft: CandidateDraft): ModelCandidate => {
+  const capabilities = draft.capabilities
+    .split(',')
+    .map((value) => value.trim())
+    .filter(Boolean)
+  if (!draft.providerId.trim() || !draft.modelId.trim()) throw new Error('Provider 與 Model 必須填寫')
+  if (capabilities.length === 0) throw new Error('至少填寫一項能力')
+
+  return {
+    providerId: draft.providerId.trim(),
+    modelId: draft.modelId.trim(),
+    capabilities,
+    qualityScore: convertFiniteNumber(draft.qualityScore, '品質分數'),
+    costScore: convertFiniteNumber(draft.costScore, '成本分數'),
+    latencyScore: convertFiniteNumber(draft.latencyScore, '延遲分數'),
+  }
+}
+const createEditor = (role: Role): PolicyEditor => ({
+  role,
+  minQualityScore: '0',
+  version: 0,
+  updatedAt: '',
+  candidates: [],
+  selectedIds: [],
+  candidateDrafts: {},
+  draft: createBlankDraft(),
+  loadState: 'pending',
+})
+
 export const useModelSettings = (): ModelSettingsComposable => {
   /*********************************************
    * 📂 Category: Refs / Reactive State
    * 🔧 Defines: 模型設定頁面的反應式狀態
    *********************************************/
 
-  const editors = ref<PolicyEditor[]>([])
+  const editors = ref<PolicyEditor[]>(roles.map(createEditor))
   const capacities = ref<Capacity[]>([])
   const health = ref<HealthEntry[]>([])
   const catalog = ref<ModelCatalog[]>([])
@@ -43,61 +102,6 @@ export const useModelSettings = (): ModelSettingsComposable => {
    * 📂 Category: Methods
    * 🔧 Defines: 模型政策載入、編輯與儲存流程
    *********************************************/
-
-  const blankDraft = (): CandidateDraft => ({
-    providerId: '',
-    modelId: '',
-    capabilities: '',
-    qualityScore: '',
-    costScore: '',
-    latencyScore: '',
-  })
-  const modelKey = (model: Pick<ModelCandidate, 'providerId' | 'modelId'>): string =>
-    `${model.providerId}:${model.modelId}`
-  const candidateDraft = (candidate: ModelCandidate): CandidateDraft => ({
-    providerId: candidate.providerId,
-    modelId: candidate.modelId,
-    capabilities: candidate.capabilities.join(', '),
-    qualityScore: String(candidate.qualityScore),
-    costScore: String(candidate.costScore),
-    latencyScore: String(candidate.latencyScore),
-  })
-  const finiteNumber = (value: string, label: string): number => {
-    if (value.trim() === '') throw new Error(`${label} 必須是有限數字`)
-    const parsed = Number(value)
-    if (!Number.isFinite(parsed)) throw new Error(`${label} 必須是有限數字`)
-
-    return parsed
-  }
-  const fromDraft = (draft: CandidateDraft): ModelCandidate => {
-    const capabilities = draft.capabilities
-      .split(',')
-      .map((value) => value.trim())
-      .filter(Boolean)
-    if (!draft.providerId.trim() || !draft.modelId.trim()) throw new Error('Provider 與 Model 必須填寫')
-    if (capabilities.length === 0) throw new Error('至少填寫一項能力')
-
-    return {
-      providerId: draft.providerId.trim(),
-      modelId: draft.modelId.trim(),
-      capabilities,
-      qualityScore: finiteNumber(draft.qualityScore, '品質分數'),
-      costScore: finiteNumber(draft.costScore, '成本分數'),
-      latencyScore: finiteNumber(draft.latencyScore, '延遲分數'),
-    }
-  }
-  const createEditor = (role: Role): PolicyEditor => ({
-    role,
-    minQualityScore: '0',
-    version: 0,
-    updatedAt: '',
-    candidates: [],
-    selectedIds: [],
-    candidateDrafts: {},
-    draft: blankDraft(),
-    loadState: 'pending',
-  })
-  editors.value = roles.map(createEditor)
 
   const load = async (): Promise<void> => {
     const policiesPromise = Promise.all(
@@ -138,9 +142,9 @@ export const useModelSettings = (): ModelSettingsComposable => {
             version: data.version,
             updatedAt: data.updatedAt,
             candidates: data.whitelist,
-            selectedIds: data.whitelist.map(modelKey),
+            selectedIds: data.whitelist.map(formatModelKey),
             candidateDrafts: Object.fromEntries(
-              data.whitelist.map((candidate) => [modelKey(candidate), candidateDraft(candidate)])
+              data.whitelist.map((candidate) => [formatModelKey(candidate), convertCandidateToDraft(candidate)])
             ),
           }
         }
@@ -164,14 +168,14 @@ export const useModelSettings = (): ModelSettingsComposable => {
 
   const addCandidate = (editor: PolicyEditor): void => {
     try {
-      const candidate = fromDraft(editor.draft)
-      const candidateId = modelKey(candidate)
-      if (!editor.candidates.some((item) => modelKey(item) === candidateId)) {
+      const candidate = convertDraftToCandidate(editor.draft)
+      const candidateId = formatModelKey(candidate)
+      if (!editor.candidates.some((item) => formatModelKey(item) === candidateId)) {
         editor.candidates.push(candidate)
-        editor.candidateDrafts[candidateId] = candidateDraft(candidate)
+        editor.candidateDrafts[candidateId] = convertCandidateToDraft(candidate)
         editor.selectedIds.push(candidateId)
       }
-      editor.draft = blankDraft()
+      editor.draft = createBlankDraft()
       editor.validationError = undefined
     } catch (reason) {
       editor.validationError = reason instanceof Error ? reason.message : '候選模型資料無效'
@@ -179,7 +183,7 @@ export const useModelSettings = (): ModelSettingsComposable => {
   }
 
   const selectCatalogModel = (editor: PolicyEditor, selectedKey: string): void => {
-    const model = catalog.value.find((entry: ModelCatalog) => modelKey(entry) === selectedKey)
+    const model = catalog.value.find((entry: ModelCatalog) => formatModelKey(entry) === selectedKey)
     if (model) {
       editor.draft.providerId = model.providerId
       editor.draft.modelId = model.modelId
@@ -187,7 +191,7 @@ export const useModelSettings = (): ModelSettingsComposable => {
   }
 
   const toggle = (editor: PolicyEditor, candidate: ModelCandidate): void => {
-    const candidateId = modelKey(candidate)
+    const candidateId = formatModelKey(candidate)
     const index = editor.selectedIds.indexOf(candidateId)
     if (index >= 0) editor.selectedIds.splice(index, 1)
     else editor.selectedIds.push(candidateId)
@@ -201,13 +205,13 @@ export const useModelSettings = (): ModelSettingsComposable => {
     }
     try {
       const candidates = editor.candidates.map((candidate) =>
-        fromDraft(editor.candidateDrafts[modelKey(candidate)] ?? candidateDraft(candidate))
+        convertDraftToCandidate(editor.candidateDrafts[formatModelKey(candidate)] ?? convertCandidateToDraft(candidate))
       )
       const selectedIds = new Set(editor.selectedIds)
       await savePolicy({
         role: editor.role,
-        whitelist: candidates.filter((candidate) => selectedIds.has(modelKey(candidate))),
-        minQualityScore: finiteNumber(editor.minQualityScore, '最低品質分數'),
+        whitelist: candidates.filter((candidate) => selectedIds.has(formatModelKey(candidate))),
+        minQualityScore: convertFiniteNumber(editor.minQualityScore, '最低品質分數'),
       })
       editor.validationError = undefined
       message.value = `${editor.role} 已儲存`
@@ -232,7 +236,7 @@ export const useModelSettings = (): ModelSettingsComposable => {
     selectCatalogModel,
     toggle,
     save,
-    id: modelKey,
-    catalogId: modelKey,
+    id: formatModelKey,
+    catalogId: formatModelKey,
   }
 }
