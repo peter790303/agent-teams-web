@@ -7,7 +7,6 @@ import { MODEL_ROLES } from '~/layers/domain/types'
 
 import { getCapacities, getCatalog, getHealth, getPolicy, savePolicy } from '../repositories'
 import type {
-  CandidateDraft,
   Capacity,
   HealthEntry,
   ModelCatalog,
@@ -16,78 +15,23 @@ import type {
   PolicyEditor,
   Role,
 } from '../types'
-
-/*********************************************
- * 📂 Category: Static Data
- * 🔧 Defines: 模型設定頁面的固定資料
- *********************************************/
-
-const roles: readonly Role[] = MODEL_ROLES
-
-/*********************************************
- * 📂 Category: Methods
- * 🔧 Defines: 模型設定資料的純轉換與建立函式
- *********************************************/
-
-const createBlankDraft = (): CandidateDraft => ({
-  providerId: '',
-  modelId: '',
-  capabilities: '',
-  qualityScore: '',
-  costScore: '',
-  latencyScore: '',
-})
-const formatModelKey = (model: Pick<ModelCandidate, 'providerId' | 'modelId'>): string =>
-  `${model.providerId}:${model.modelId}`
-const convertCandidateToDraft = (candidate: ModelCandidate): CandidateDraft => ({
-  providerId: candidate.providerId,
-  modelId: candidate.modelId,
-  capabilities: candidate.capabilities.join(', '),
-  qualityScore: String(candidate.qualityScore),
-  costScore: String(candidate.costScore),
-  latencyScore: String(candidate.latencyScore),
-})
-const convertFiniteNumber = (value: string, label: string): number => {
-  if (value.trim() === '') throw new Error(`${label} 必須是有限數字`)
-  const parsed = Number(value)
-  if (!Number.isFinite(parsed)) throw new Error(`${label} 必須是有限數字`)
-
-  return parsed
-}
-const convertDraftToCandidate = (draft: CandidateDraft): ModelCandidate => {
-  const capabilities = draft.capabilities
-    .split(',')
-    .map((value) => value.trim())
-    .filter(Boolean)
-  if (!draft.providerId.trim() || !draft.modelId.trim()) throw new Error('Provider 與 Model 必須填寫')
-  if (capabilities.length === 0) throw new Error('至少填寫一項能力')
-
-  return {
-    providerId: draft.providerId.trim(),
-    modelId: draft.modelId.trim(),
-    capabilities,
-    qualityScore: convertFiniteNumber(draft.qualityScore, '品質分數'),
-    costScore: convertFiniteNumber(draft.costScore, '成本分數'),
-    latencyScore: convertFiniteNumber(draft.latencyScore, '延遲分數'),
-  }
-}
-const createEditor = (role: Role): PolicyEditor => ({
-  role,
-  minQualityScore: '0',
-  version: 0,
-  updatedAt: '',
-  candidates: [],
-  selectedIds: [],
-  candidateDrafts: {},
-  draft: createBlankDraft(),
-  loadState: 'pending',
-})
+import { useModelSettingsHelpers } from '../utils/modelSettingsHelpers'
 
 export const useModelSettings = (): ModelSettingsComposable => {
   /*********************************************
    * 📂 Category: Refs / Reactive State
    * 🔧 Defines: 模型設定頁面的反應式狀態
    *********************************************/
+
+  const roles: readonly Role[] = MODEL_ROLES
+  const {
+    createBlankDraft,
+    createEditor,
+    convertCandidateToDraft,
+    convertDraftToCandidate,
+    convertFiniteNumber,
+    formatModelKey,
+  } = useModelSettingsHelpers()
 
   const editors = ref<PolicyEditor[]>(roles.map(createEditor))
   const capacities = ref<Capacity[]>([])
