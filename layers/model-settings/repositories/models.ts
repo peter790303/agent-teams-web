@@ -1,13 +1,43 @@
+/*********************************************
+ * 📂 Category: Imports
+ * 🔧 Defines: 引入必要的模組和庫
+ *********************************************/
+
 import { request } from '~/layers/base/repositories/http'
 import type { Model as ModelCandidate } from '~/layers/domain/model/Model'
 import { MODEL_ROLES, type Role } from '~/layers/domain/types'
+import { toCapacity, toHealth, toPolicy } from '~/layers/domain/model-settings/assemblers/modelSettings.assembler'
 import type { Capacity, HealthEntry, Policy } from '../types'
 import type { CapacityResource, HealthResource, PolicyResource } from '../types/api'
-import { toCapacity, toHealth, toPolicy, toPolicyPayload } from '../utils/modelSettingsMappers'
+import { toPolicyPayload } from '../utils/modelSettingsMappers'
+
+/*********************************************
+ * 📂 Category: Interface
+ * 🔧 Defines: 定義元件內使用的自訂 TypeScript 型別
+ *********************************************/
 
 export interface GetPolicyInput { role: Role }
-export const getPolicy = ({ role }: GetPolicyInput): Promise<Policy> =>
-  request<PolicyResource>(`/model-policies/${role}`).then((response) => toPolicy(response, role))
+
+/*********************************************
+ * 📂 Category: Methods
+ * 🔧 Defines: 定義函數與事件處理
+ *********************************************/
+
+const isNotFoundError = (reason: unknown): boolean => {
+  if (!reason || typeof reason !== 'object') return false
+  const error = reason as { statusCode?: unknown; status?: unknown; response?: { status?: unknown } }
+  return error.statusCode === 404 || error.status === 404 || error.response?.status === 404
+}
+
+export const getPolicy = async ({ role }: GetPolicyInput): Promise<Policy | null> => {
+  try {
+    const response = await request<PolicyResource>(`/model-policies/${role}`)
+    return toPolicy(response, role)
+  } catch (reason) {
+    if (isNotFoundError(reason)) return null
+    throw reason
+  }
+}
 
 export interface SavePolicyInput { role: Role; whitelist: ModelCandidate[]; minQualityScore?: number }
 export const savePolicy = ({ role, whitelist, minQualityScore = 0 }: SavePolicyInput): Promise<Policy> =>

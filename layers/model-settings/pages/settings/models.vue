@@ -1,7 +1,23 @@
 <script setup lang="ts">
-// 📂 Category: model-settings page composition
+/*********************************************
+ * 📂 Category: Imports
+ * 🔧 Defines: 引入必要的模組和庫
+ *********************************************/
+
 import { useModelSettings } from '~/layers/model-settings/composables/useModelSettings'
+
+/*********************************************
+ * 📂 Category: Composables / Plugins
+ * 🔧 Defines: 自定 composables、Pinia 狀態、i18n、plugin 等注入來源
+ *********************************************/
+
 const { editors, capacities, health, message, error, load, addCandidate, toggle, save, id } = useModelSettings()
+
+/*********************************************
+ * 📂 Category: Lifecycle Hooks
+ * 🔧 Defines: Vue 生命週期 hook —— onMounted、onUnmounted 等
+ *********************************************/
+
 useSeoMeta({ title: '模型設定與監控' })
 onMounted(load)
 </script>
@@ -12,11 +28,11 @@ onMounted(load)
         <v-col v-for="editor in editors" :key="editor.role" cols="12" md="6">
     <p v-if="message" role="status">{{ message }}</p><p v-if="error" role="alert">{{ error }}</p>
     <section class="policy"><h2>{{ editor.role }}</h2><p v-if="editor.loadError">{{ editor.loadError }}</p><p v-if="editor.validationError" role="alert">{{ editor.validationError }}</p>
-      <label>最低品質分數 <input v-model="editor.minQualityScore" type="number" min="0" /></label>
+      <label>最低品質分數 <input v-model="editor.minQualityScore" type="number" min="0" :disabled="editor.loadState === 'failed' || editor.loadState === 'pending'" /></label>
       <ul><li v-for="candidate in editor.candidates" :key="id(candidate)"><label><input :checked="editor.selectedIds.includes(id(candidate))" type="checkbox" @change="toggle(editor, candidate)" /> {{ candidate.providerId }}/{{ candidate.modelId }}</label>
         <label>能力 <input v-model="editor.candidateDrafts[id(candidate)].capabilities" :aria-label="`${candidate.modelId} capabilities`" /></label><label>品質 <input v-model="editor.candidateDrafts[id(candidate)].qualityScore" type="number" /></label><label>成本 <input v-model="editor.candidateDrafts[id(candidate)].costScore" type="number" /></label><label>延遲 <input v-model="editor.candidateDrafts[id(candidate)].latencyScore" type="number" /></label>
       </li></ul>
-      <form @submit.prevent="addCandidate(editor)"><input v-model="editor.draft.providerId" aria-label="Provider" placeholder="Provider" /><input v-model="editor.draft.modelId" aria-label="Model" placeholder="Model" /><input v-model="editor.draft.capabilities" aria-label="Capabilities" placeholder="Capabilities（逗號分隔）" /><input v-model="editor.draft.qualityScore" aria-label="Quality score" type="number" placeholder="品質分數" /><input v-model="editor.draft.costScore" aria-label="Cost score" type="number" placeholder="成本分數" /><input v-model="editor.draft.latencyScore" aria-label="Latency score" type="number" placeholder="延遲分數" /><button type="submit">新增候選</button></form><button @click="save(editor)">儲存</button></section>
+      <form @submit.prevent="addCandidate(editor)"><input v-model="editor.draft.providerId" aria-label="Provider" placeholder="Provider" /><input v-model="editor.draft.modelId" aria-label="Model" placeholder="Model" /><input v-model="editor.draft.capabilities" aria-label="Capabilities" placeholder="Capabilities（逗號分隔）" /><input v-model="editor.draft.qualityScore" aria-label="Quality score" type="number" placeholder="品質分數" /><input v-model="editor.draft.costScore" aria-label="Cost score" type="number" placeholder="成本分數" /><input v-model="editor.draft.latencyScore" aria-label="Latency score" type="number" placeholder="延遲分數" /><button type="submit" :disabled="editor.loadState === 'failed' || editor.loadState === 'pending'">新增候選</button></form><button :disabled="editor.loadState !== 'loaded' && editor.loadState !== 'missing'" @click="save(editor)">儲存</button></section>
         </v-col>
       </v-row>
       <v-row>
