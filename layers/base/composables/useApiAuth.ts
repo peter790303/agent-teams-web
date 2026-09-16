@@ -1,61 +1,36 @@
 /*********************************************
  * 📂 Category: Composables / Plugins
- * 🔧 Defines: Nest API key 的 session 狀態
+ * 🔧 Defines: 自定 composables、Pinia 狀態、i18n、plugin 等注入來源
  *********************************************/
-const ACCESS_KEY_STORAGE = 'nest-api-access-key'
-
 export const useApiAuth = () => {
+  const config = useRuntimeConfig()
+
   /*********************************************
    * 📂 Category: Refs / Reactive State
-   * 🔧 Defines: API key 與驗證錯誤狀態
+   * 🔧 Defines: 元件中的 ref, reactive 等可變資料狀態
    *********************************************/
-  const accessKey = useState<string | null>('nest-api-access-key', () => null)
   const authError = useState<string | null>('nest-api-auth-error', () => null)
-  const initialized = useState<boolean>('nest-api-auth-initialized', () => false)
 
-  if (import.meta.client && !initialized.value) {
-    accessKey.value = window.sessionStorage.getItem(ACCESS_KEY_STORAGE)
-    initialized.value = true
-  }
+  /*********************************************
+   * 📂 Category: Computed
+   * 🔧 Defines: 定義計算屬性
+   *********************************************/
+  const accessKey = computed<string>(() => config.public.nestApiKey.trim())
 
   /*********************************************
    * 📂 Category: Methods
-   * 🔧 Defines: API key 儲存與驗證狀態轉換
+   * 🔧 Defines: 定義函數與事件處理
    *********************************************/
-  const setAccessKey = (value: string): void => {
-    const normalizedValue = value.trim()
-    accessKey.value = normalizedValue || null
-    authError.value = null
-
-    if (import.meta.client) {
-      if (normalizedValue) window.sessionStorage.setItem(ACCESS_KEY_STORAGE, normalizedValue)
-      else window.sessionStorage.removeItem(ACCESS_KEY_STORAGE)
-    }
-  }
-
-  const clearAccessKey = (): void => {
-    accessKey.value = null
-    if (import.meta.client) window.sessionStorage.removeItem(ACCESS_KEY_STORAGE)
-  }
-
   const requireAccessKey = (): string => {
     if (accessKey.value) return accessKey.value
 
-    authError.value = '請先輸入 Nest API access key。'
-    throw new Error('Nest API access key is required')
+    authError.value = '尚未設定 Nest client key，請更新前端環境設定並重新啟動服務。'
+    throw new Error('Nest client key is required')
   }
 
   const markUnauthorized = (): void => {
-    clearAccessKey()
-    authError.value = 'Nest API key 無效或已過期，請重新輸入。'
+    authError.value = 'Nest client key 無效、已過期或已停用，請確認 client 資料與前端環境設定。'
   }
 
-  return {
-    accessKey,
-    authError,
-    setAccessKey,
-    clearAccessKey,
-    requireAccessKey,
-    markUnauthorized,
-  }
+  return { accessKey, authError, requireAccessKey, markUnauthorized }
 }

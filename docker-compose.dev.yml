@@ -6,6 +6,7 @@ services:
     ports:
       - '127.0.0.1:30679:30679'
     environment:
+      NUXT_PUBLIC_NEST_API_KEY: ${NEST_API_KEY:-}
       NUXT_PUBLIC_API_BASE: ${NUXT_PUBLIC_API_BASE:-http://localhost:30678}
       PORT: 30679
     volumes:
