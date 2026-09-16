@@ -3,7 +3,7 @@
  * 🔧 Defines: 引入必要的模組和庫
  *********************************************/
 import { DispatchStatusEnum } from '~/layers/domain/task/enums/DispatchStatusEnum'
-import { TaskStageEnum } from '~/layers/domain/task/enums/TaskStageEnum'
+import { isTaskStage, TaskStageEnum } from '~/layers/domain/task/enums/TaskStageEnum'
 import type { DispatchStatus } from '~/layers/domain/task/types/DispatchStatus'
 import {
   createTask,
@@ -13,6 +13,7 @@ import {
   resumeTask,
   submitTask,
 } from '~/layers/office/repositories'
+import { OfficeLoadStatusEnum } from '~/layers/office/types'
 import type {
   Intervention,
   OfficeComposable,
@@ -28,7 +29,7 @@ export const useOffice = (): OfficeComposable => {
    * 🔧 Defines: 元件中的 ref, reactive 等可變資料狀態
    *********************************************/
   const tasks = useState<Task[]>('tasks', () => [])
-  const taskLoadStatus = useState<'idle' | 'loading' | 'success' | 'error'>('tasks-load-status', () => 'idle')
+  const taskLoadStatus = useState<OfficeLoadStatusEnum>('tasks-load-status', () => OfficeLoadStatusEnum.IDLE)
   const taskStates = useState<TaskState[]>('task-states', () => [])
   const error = useState<string | null>('tasks-error', () => null)
 
@@ -58,7 +59,7 @@ export const useOffice = (): OfficeComposable => {
     }
 
     return taskStates.value.reduce<Record<string, DispatchStatus>>((next, state) => {
-      const role = stageRoles[state.data.stage]
+      const role = isTaskStage(state.data.stage) ? stageRoles[state.data.stage] : undefined
       if (role && next[role] === undefined) next[role] = DispatchStatusEnum.DISPATCHED
 
       return next
@@ -73,14 +74,14 @@ export const useOffice = (): OfficeComposable => {
     error.value = message
   }
   const load = async (): Promise<void> => {
-    taskLoadStatus.value = 'loading'
+    taskLoadStatus.value = OfficeLoadStatusEnum.LOADING
     setError(null)
     const taskResult = await listTasks()
     if (taskResult.error) {
       tasks.value = []
       taskStates.value = []
       setError(taskResult.error)
-      taskLoadStatus.value = 'error'
+      taskLoadStatus.value = OfficeLoadStatusEnum.ERROR
 
       return
     }
@@ -88,12 +89,12 @@ export const useOffice = (): OfficeComposable => {
       tasks.value = []
       taskStates.value = []
       setError('載入任務失敗')
-      taskLoadStatus.value = 'error'
+      taskLoadStatus.value = OfficeLoadStatusEnum.ERROR
 
       return
     }
     tasks.value = taskResult.data
-    taskLoadStatus.value = 'success'
+    taskLoadStatus.value = OfficeLoadStatusEnum.SUCCESS
     const states = await Promise.allSettled(tasks.value.map((task) => getTaskState({ id: task.id })))
     const stateErrors = states.flatMap((result) =>
       result.status === 'rejected'

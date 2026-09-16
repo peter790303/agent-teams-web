@@ -49,6 +49,18 @@
     qa: '驗證成果並保存 QA 報告。',
     delivery: '呈現交付分支、驗收與環境清理狀態。',
   }
+  const stageLabels: Record<string, string> = {
+    pending_dispatch: '等待派工',
+    spec: '規格整理',
+    plan: '開發計畫',
+    implementation: '實作中',
+    review: '審查中',
+    qa: '品質驗證',
+    delivery_cleanup: '交付清理',
+    completed: '已完成',
+    cancelled: '已取消',
+    unknown: '未知',
+  }
 
   /*********************************************
    * 📂 Category: Computed
@@ -86,7 +98,6 @@
         : []
     })
   )
-  const executions = computed<Execution[]>(() => taskStates.value.flatMap((state) => state.data.executions))
   const clockText = computed<string>(() =>
     now.value ? now.value.toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit' }) : '--:--'
   )
@@ -172,14 +183,13 @@
             :tasks="tasks"
             :activities="activities"
             :resources="resources"
-            :executions="executions"
             :task-load-status="taskLoadStatus"
         /></v-col>
       </v-row>
       <v-row>
         <v-col cols="12">
           <section class="taskbar">
-            <form class="d-flex ga-2" @submit.prevent="submit">
+            <v-form class="d-flex ga-2" @submit.prevent="submit">
               <v-text-field
                 v-model="purpose"
                 required
@@ -198,11 +208,11 @@
                 aria-label="Project ID"
                 placeholder="project id"
               /><v-btn type="submit" color="primary">＋ 新增任務</v-btn>
-            </form>
+            </v-form>
             <p v-if="error" role="alert">{{ error }}</p>
             <div class="task-list d-flex flex-wrap ga-2 mt-3">
               <NuxtLink v-for="task in taskLinks" :key="task.id" class="pa-2 bg-taskSurface" :to="task.href"
-                >{{ task.purpose }} <small>{{ task.stage }}</small></NuxtLink
+                >{{ task.purpose }} <small>{{ stageLabels[task.stage] ?? '未知' }}</small></NuxtLink
               >
             </div>
           </section>

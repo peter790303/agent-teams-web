@@ -26,7 +26,7 @@ export interface GetPolicyInput {
   role: Role
 }
 
-const { toCapacity, toHealth, toPolicy } = useModelSettingsAssemblers()
+const { toCapacity, toCatalog, toHealth, toPolicy } = useModelSettingsAssemblers()
 const { toPolicyPayload } = useModelSettingsMappers()
 
 /*********************************************
@@ -68,12 +68,6 @@ export const getHealth = (): Promise<HealthEntry[]> => request<HealthResource>('
 export const getCapacities = (): Promise<Capacity[]> => request<CapacityResource>('/roles/capacities').then(toCapacity)
 
 export const getCatalog = (): Promise<ModelCatalog[]> =>
-  request<ModelCatalogResource>('/model-policies/catalog').then((response) =>
-    (response.data ?? []).flatMap((entry) =>
-      typeof entry.providerId === 'string' && typeof entry.modelId === 'string'
-        ? [{ providerId: entry.providerId, modelId: entry.modelId }]
-        : []
-    )
-  )
+  request<ModelCatalogResource>('/model-policies/catalog').then(toCatalog)
 
 export { MODEL_ROLES }

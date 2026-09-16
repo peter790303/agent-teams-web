@@ -5,8 +5,8 @@
 
 import { useModelAssemblers } from '../../model/assemblers/modelAssemblers'
 import { MODEL_ROLES, type Role } from '../../types'
-import type { Capacity, HealthEntry, Policy, PolicyData } from '../ModelSettings'
-import type { CapacityResource, HealthResource, PolicyResource } from '../resources'
+import type { Capacity, HealthEntry, ModelCatalog, Policy, PolicyData } from '../ModelSettings'
+import type { CapacityResource, HealthResource, ModelCatalogResource, PolicyResource } from '../resources'
 
 /*********************************************
  * 📂 Category: Methods
@@ -56,6 +56,13 @@ const toHealth = (response: HealthResource): HealthEntry[] =>
     }
   })
 
+const toCatalog = (response: ModelCatalogResource): ModelCatalog[] =>
+  (response.data ?? []).flatMap((entry) =>
+    typeof entry.providerId === 'string' && typeof entry.modelId === 'string'
+      ? [{ providerId: entry.providerId, modelId: entry.modelId }]
+      : []
+  )
+
 const toCapacity = (response: CapacityResource): Capacity[] =>
   (response.data ?? []).map((value) => {
     const entry = value && typeof value === 'object' ? (value as Record<string, unknown>) : {}
@@ -75,4 +82,5 @@ export const useModelSettingsAssemblers = (): {
   toPolicy: typeof toPolicy
   toHealth: typeof toHealth
   toCapacity: typeof toCapacity
-} => ({ toPolicy, toHealth, toCapacity })
+  toCatalog: typeof toCatalog
+} => ({ toPolicy, toHealth, toCapacity, toCatalog })

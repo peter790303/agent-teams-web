@@ -75,8 +75,7 @@
             height="3"
             aria-label="員工工作狀態"
           />
-          ></span
-        >
+        </span>
       </v-btn>
     </div>
   </section>

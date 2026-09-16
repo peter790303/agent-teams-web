@@ -46,3 +46,8 @@ export interface Capacity {
   availableCapacity: number
   updatedAt: string
 }
+
+export interface ModelCatalog {
+  providerId: string
+  modelId: string
+}

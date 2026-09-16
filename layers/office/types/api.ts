@@ -4,8 +4,8 @@
  *********************************************/
 import type { ComputedRef, Ref } from 'vue'
 
-import type { TaskStageEnum } from '~/layers/domain/task/enums/TaskStageEnum'
 import type { Task } from '~/layers/domain/task/Task'
+import type { Intervention, TaskState } from '~/layers/domain/task/TaskState'
 import type { DispatchStatus } from '~/layers/domain/task/types/DispatchStatus'
 
 /*********************************************
@@ -14,22 +14,13 @@ import type { DispatchStatus } from '~/layers/domain/task/types/DispatchStatus'
  *********************************************/
 export type { Role } from '~/layers/domain/types'
 export type { Task } from '~/layers/domain/task/Task'
-export interface Dispatch {
-  id: string
-  role: string
-  status: DispatchStatus
-  blockedReasons: string[]
-  dependencies: string[]
-  updatedAt: string
-}
+export type { Dispatch, Execution, Intervention, TaskState, TaskStateData } from '~/layers/domain/task/TaskState'
+export type { TaskAction as TaskActionResource } from '~/layers/domain/task/TaskState'
 export interface TaskListResource {
   data?: unknown[]
 }
 export interface TaskResource {
   data?: unknown
-}
-export interface TaskActionResource {
-  data?: Record<string, unknown> | null
 }
 export interface CreateTaskPayload {
   purpose: string
@@ -47,44 +38,9 @@ export interface SubmitTaskPayload {
   gate: string
   idempotencyKey: string
 }
-export interface TaskStateData {
-  task: Task
-  revision: number
-  stage: TaskStageEnum
-  activity: string
-  updatedAt?: string
-  dispatches: Dispatch[]
-  executions: Execution[]
-  spec: Record<string, unknown> | null
-  plan: Record<string, unknown> | null
-  workspace: Record<string, unknown> | null
-  qaReport: Record<string, unknown> | null
-  delivery: Record<string, unknown> | null
-}
-export interface Execution {
-  id?: string
-  role?: string
-  status?: string
-  updatedAt?: string
-  createdAt?: string
-  [key: string]: unknown
-}
 export interface ActivityItem {
   text: string
   updatedAt: string | null
-}
-export interface TaskState {
-  data: TaskStateData
-}
-export interface Intervention {
-  status: string
-  blockers?: string[]
-  instruction?: string
-  worktree?: string
-  processId?: string
-  preview?: string
-  automaticWriting?: string
-  round?: number
 }
 export interface ResumeTaskCommand {
   id: string
@@ -100,9 +56,15 @@ export interface SubmitTaskCommand {
   gate: string
   idempotencyKey: string
 }
+export enum OfficeLoadStatusEnum {
+  IDLE = 'idle',
+  LOADING = 'loading',
+  SUCCESS = 'success',
+  ERROR = 'error',
+}
 export interface OfficeComposable {
   tasks: Ref<Task[]>
-  taskLoadStatus: Ref<'idle' | 'loading' | 'success' | 'error'>
+  taskLoadStatus: Ref<OfficeLoadStatusEnum>
   taskStates: Ref<TaskState[]>
   roleStatuses: ComputedRef<Record<string, DispatchStatus>>
   error: Ref<string | null>

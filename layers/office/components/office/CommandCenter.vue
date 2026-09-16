@@ -4,7 +4,7 @@
    * 🔧 Defines: 引入任務型別
    *********************************************/
   import { TaskStageEnum } from '~/layers/domain/task/enums/TaskStageEnum'
-  import type { Execution, Task } from '~/layers/office/types'
+  import type { Task } from '~/layers/office/types'
 
   /*********************************************
    * 📂 Category: Interface
@@ -13,11 +13,31 @@
   type CommandStats = {
     completed: number
     waiting: number
-    failed: number
     running: number
   }
   type ActivityItem = { text: string; updatedAt: string | null }
-  type ResourceItem = { name: string; status?: string; owner?: string }
+  type ResourceItem = { name: string; status?: string; owner?: string; percent?: number }
+  const stageLabels: Record<string, string> = {
+    pending_dispatch: '等待派工',
+    spec: '規格整理',
+    plan: '開發計畫',
+    implementation: '實作中',
+    review: '審查中',
+    qa: '品質驗證',
+    delivery_cleanup: '交付清理',
+    completed: '已完成',
+    cancelled: '已取消',
+    unknown: '未知',
+  }
+  const stageLabel = (stage: string): string => stageLabels[stage] ?? '未知'
+  const formatTime = (value: string | null): string => {
+    if (!value) return '未知'
+    const date = new Date(value)
+
+    return Number.isNaN(date.getTime())
+      ? '未知'
+      : date.toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit' })
+  }
 
   /*********************************************
    * 📂 Category: Props / Emits
@@ -27,7 +47,6 @@
     tasks: Task[]
     activities: ActivityItem[]
     resources: ResourceItem[]
-    executions: Execution[]
     taskLoadStatus: 'idle' | 'loading' | 'success' | 'error'
   }>()
 
@@ -44,7 +63,6 @@
   const stats = computed<CommandStats>(() => ({
     completed: props.tasks.filter((task) => task.stage === TaskStageEnum.COMPLETED).length,
     waiting: props.tasks.filter((task) => task.stage === TaskStageEnum.PENDING_DISPATCH).length,
-    failed: props.tasks.filter((task) => task.stage === TaskStageEnum.CANCELLED).length,
     running: props.tasks.filter(
       (task) =>
         ![TaskStageEnum.COMPLETED, TaskStageEnum.CANCELLED, TaskStageEnum.PENDING_DISPATCH].includes(
@@ -55,13 +73,18 @@
   const pendingTasks = computed<Task[]>(() =>
     props.tasks.filter((task) => task.stage === TaskStageEnum.PENDING_DISPATCH)
   )
-  const feed = computed<ActivityItem[]>(() =>
-    props.activities.length
+  const feed = computed<ActivityItem[]>(() => {
+    const source = props.activities.length
       ? props.activities
-      : props.tasks
-          .slice(0, 5)
-          .map((task) => ({ text: `${task.purpose} · ${task.stage}`, updatedAt: task.updatedAt ?? null }))
-  )
+      : props.tasks.map((task) => ({
+          text: `${task.purpose} · ${stageLabel(task.stage)}`,
+          updatedAt: task.updatedAt ?? null,
+        }))
+
+    return [...source]
+      .sort((left, right) => Date.parse(right.updatedAt ?? '') - Date.parse(left.updatedAt ?? ''))
+      .slice(0, 5)
+  })
   const statsLabel = computed<string | null>(() => {
     if (props.taskLoadStatus === 'success') return null
     if (props.taskLoadStatus === 'loading' || props.taskLoadStatus === 'idle') return '載入中…'
@@ -105,7 +128,7 @@
             :key="`${item}-${index}`"
             class="event d-flex align-baseline ga-2 py-1 text-caption"
           >
-            <time class="flex-shrink-0 text-caption text-textMuted">{{ item.updatedAt ?? '未知' }}</time>
+            <time class="flex-shrink-0 text-caption text-textMuted">{{ formatTime(item.updatedAt) }}</time>
             <p class="ma-0 text-caption text-textMuted">{{ item.text }}</p>
           </div>
           <div v-if="!feed.length" class="empty d-flex flex-column ga-1 py-1 text-caption text-textMuted">
@@ -127,10 +150,6 @@
             ><small class="text-caption text-textMuted">等待處理</small>
           </div>
           <div class="pa-1 text-center border border-border">
-            <strong class="d-block text-subtitle-2 text-warning">{{ stats.failed }}</strong
-            ><small class="text-caption text-textMuted">錯誤</small>
-          </div>
-          <div class="pa-1 text-center border border-border">
             <strong class="d-block text-subtitle-2 text-warning">{{ stats.running }}</strong
             ><small class="text-caption text-textMuted">運行中</small>
           </div>
@@ -146,26 +165,30 @@
             :to="`/office/tasks/${task.id}`"
           >
             <strong>{{ task.purpose }}</strong
-            ><small>{{ task.stage }}</small>
+            ><small>{{ stageLabel(task.stage) }}</small>
           </NuxtLink>
           <p v-if="!pendingTasks.length" class="empty ma-0 py-1 text-caption text-textMuted">目前沒有待處理任務</p>
         </div>
       </section>
       <section class="command-section px-3 py-2 border-b border-border">
         <h2 class="ma-0 text-body-2 font-weight-bold">系統資源</h2>
-        <div v-if="props.resources.length" class="resource-list mt-1">
-          <div v-for="resource in props.resources" :key="resource.name" class="resource-row text-caption">
+        <div class="resource-list mt-1">
+          <div
+            v-for="resource in [{ name: 'CPU' }, { name: '記憶體' }, { name: 'Token' }, ...props.resources]"
+            :key="resource.name"
+            class="resource-row text-caption"
+          >
             <span>{{ resource.name }}</span
-            ><span>{{ resource.status ?? '未知' }}</span>
+            ><span>{{ resource.percent === undefined ? '未知' : `${resource.percent}%` }}</span>
             <v-progress-linear
-              :model-value="resource.status === 'active' ? 100 : 0"
+              v-if="resource.percent !== undefined"
+              :model-value="resource.percent"
               color="warning"
               height="4"
               aria-label="資源狀態"
             />
           </div>
         </div>
-        <p v-else class="notice ma-0 mt-1 text-caption text-textMuted">未知</p>
       </section>
     </template>
     <section v-else-if="tab === 'activity'" class="command-section px-3 py-2 border-b border-border">
@@ -186,7 +209,7 @@
           :key="`${item}-${index}`"
           class="event d-flex align-baseline ga-2 py-1 text-caption"
         >
-          <time class="flex-shrink-0 text-caption text-textMuted">{{ item.updatedAt ?? '未知' }}</time>
+          <time class="flex-shrink-0 text-caption text-textMuted">{{ formatTime(item.updatedAt) }}</time>
           <p class="ma-0 text-caption text-textMuted">{{ item.text }}</p>
         </div>
       </div>
@@ -210,7 +233,7 @@
           class="task-item d-flex flex-column pa-2 bg-taskSurface text-caption"
           :to="`/office/tasks/${task.id}`"
           ><strong>{{ task.purpose }}</strong
-          ><small>{{ task.projectId }} · {{ task.stage }}</small></NuxtLink
+          ><small>{{ task.projectId }} · {{ stageLabel(task.stage) }}</small></NuxtLink
         >
         <div v-if="!props.tasks.length" class="empty py-1 text-caption text-textMuted">目前沒有任務</div>
       </div>

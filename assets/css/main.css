@@ -553,71 +553,10 @@ th {
   border: 1px solid rgb(var(--v-theme-border));
   min-width: 0;
 }
-.section-title {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-.section-title a {
-  font-size: 10px;
-  color: rgb(var(--v-theme-text-muted));
-}
 .stat-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 5px;
-}
-.resource {
-  margin-top: 9px;
-  font-size: 10px;
-}
-.resource > div:first-child {
-  display: flex;
-  justify-content: space-between;
-}
-.resource b {
-  color: rgb(var(--v-theme-text));
-}
-.resource-track {
-  height: 7px;
-  margin-top: 4px;
-  background: rgb(var(--v-theme-input-surface));
-}
-.resource-track i {
-  display: block;
-  height: 100%;
-}
-.resource-track .green {
-  background: rgb(var(--v-theme-success));
-}
-.resource-track .blue {
-  background: rgb(var(--v-theme-info));
-}
-.resource-track .purple {
-  background: rgb(var(--v-theme-accent));
-}
-.pending-card {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-top: 10px;
-  padding: 8px;
-  background: rgb(var(--v-theme-surface-alt));
-}
-.pending-card strong,
-.pending-card small {
-  display: block;
-  font-size: 10px;
-}
-.pending-card small {
-  color: rgb(var(--v-theme-text-muted));
-  margin-top: 3px;
-}
-.mini-avatar {
-  width: 25px;
-  height: 25px;
-  background: rgb(var(--v-theme-warning));
-  border: 3px solid rgb(var(--v-theme-desk-border));
 }
 .roster {
   display: block;
@@ -626,54 +565,12 @@ th {
   background: rgb(var(--v-theme-surface));
   border: 1px solid rgb(var(--v-theme-border));
 }
-.employee-card {
-  min-width: 150px;
-  display: flex;
-  gap: 8px;
-  padding: 8px;
-  border: 1px solid rgb(var(--v-theme-border));
-  background: rgb(var(--v-theme-surface-alt));
-}
-.employee-card.is-active {
-  border-color: rgb(var(--v-theme-success));
-}
 .employee-avatar {
   flex: none;
   width: 30px;
   height: 30px;
   background: rgb(var(--v-theme-warning));
   border: 3px solid rgb(var(--v-theme-desk-border));
-}
-.employee-card strong,
-.employee-card small,
-.employee-card em {
-  display: block;
-  font-style: normal;
-  font-size: 10px;
-}
-.employee-card small {
-  color: rgb(var(--v-theme-text-muted));
-}
-.employee-card em {
-  color: rgb(var(--v-theme-text-muted));
-  margin-top: 3px;
-}
-.employee-card i {
-  display: block;
-  height: 4px;
-  margin-top: 5px;
-  background: rgb(var(--v-theme-success));
-}
-.add-employee {
-  min-width: 52px;
-  border: 1px solid rgb(var(--v-theme-border));
-  background: transparent;
-  color: rgb(var(--v-theme-text-muted));
-  font-size: 24px;
-}
-.add-employee:disabled {
-  cursor: not-allowed;
-  opacity: 0.45;
 }
 .workspace.is-narrow .pixel-map {
   min-height: 560px;
@@ -962,5 +859,10 @@ th {
   margin-bottom: 2px;
 }
 .roster.is-mobile .employees {
-  grid-template-columns: repeat(2, 1fr);
+  display: flex;
+  overflow-x: auto;
+  flex-wrap: nowrap;
+}
+.roster.is-mobile .employee {
+  flex: 0 0 150px;
 }

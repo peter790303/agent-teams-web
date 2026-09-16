@@ -7,11 +7,13 @@
  *********************************************/
 import type { TaskStageEnum } from '~/layers/domain/task/enums/TaskStageEnum'
 
+export type TaskStage = TaskStageEnum | 'unknown'
+
 export interface Task {
   id: string
   purpose: string
   projectId: string
-  stage: TaskStageEnum
+  stage: TaskStage
   createdAt?: string
   updatedAt?: string
 }

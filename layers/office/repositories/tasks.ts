@@ -4,13 +4,13 @@
  *********************************************/
 import { request } from '~/layers/base/repositories/http'
 import { useTaskAssemblers } from '~/layers/domain/task/assemblers/taskAssemblers'
+import { useTaskStateAssemblers } from '~/layers/domain/task/assemblers/taskStateAssemblers'
 import type {
   Task,
   TaskState,
   Intervention,
   TaskListResource,
   TaskResource,
-  TaskActionResource,
   CreateTaskPayload,
   ResumeTaskPayload,
   SubmitTaskPayload,
@@ -45,6 +45,7 @@ export interface SubmitTaskInput extends TaskIdInput {
 }
 
 const { toTask } = useTaskAssemblers()
+const { toTaskState, toIntervention, toTaskAction } = useTaskStateAssemblers()
 
 /*********************************************
  * 📂 Category: Methods
@@ -74,11 +75,11 @@ export const createTask = ({ purpose, projectId }: CreateTaskInput): Promise<Rep
   )
 }
 export const getTaskState = ({ id }: TaskIdInput): Promise<RepositoryResult<TaskState>> =>
-  result(request<TaskState>(`/office/tasks/${encodeURIComponent(id)}/state`))
+  result(request<unknown>(`/office/tasks/${encodeURIComponent(id)}/state`).then((response) => toTaskState(response)))
 export const getIntervention = ({ id }: TaskIdInput): Promise<RepositoryResult<Intervention | null>> =>
   result(
-    request<{ data: Intervention | null }>(`/tasks/${encodeURIComponent(id)}/intervention`).then(
-      (response) => response.data ?? null
+    request<unknown>(`/tasks/${encodeURIComponent(id)}/intervention`).then((response) =>
+      toIntervention((response as { data?: unknown }).data)
     )
   )
 export const resumeTask = ({
@@ -87,14 +88,14 @@ export const resumeTask = ({
   worktree,
   failedReviewRounds,
   extraReviewRoundAllowance,
-}: ResumeTaskInput): Promise<RepositoryResult<TaskActionResource>> => {
+}: ResumeTaskInput): Promise<RepositoryResult<import('~/layers/domain/task/TaskState').TaskAction>> => {
   const payload: ResumeTaskPayload = { instruction, worktree, failedReviewRounds, extraReviewRoundAllowance }
 
   return result(
-    request<TaskActionResource>(`/tasks/${encodeURIComponent(id)}/intervention/resume`, {
+    request<unknown>(`/tasks/${encodeURIComponent(id)}/intervention/resume`, {
       method: 'POST',
       body: payload,
-    })
+    }).then((response) => toTaskAction(response))
   )
 }
 export const submitTask = ({
@@ -103,14 +104,14 @@ export const submitTask = ({
   commit,
   gate,
   idempotencyKey,
-}: SubmitTaskInput): Promise<RepositoryResult<TaskActionResource>> => {
+}: SubmitTaskInput): Promise<RepositoryResult<import('~/layers/domain/task/TaskState').TaskAction>> => {
   const payload: SubmitTaskPayload = { worktree, commit, gate, idempotencyKey }
 
   return result(
-    request<TaskActionResource>(`/tasks/${encodeURIComponent(id)}/intervention/submit`, {
+    request<unknown>(`/tasks/${encodeURIComponent(id)}/intervention/submit`, {
       method: 'POST',
       headers: { 'Idempotency-Key': idempotencyKey },
       body: payload,
-    })
+    }).then((response) => toTaskAction(response))
   )
 }

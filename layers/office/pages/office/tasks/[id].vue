@@ -51,6 +51,18 @@
    * 🔧 Defines: 不會改變的靜態資料，例如選單、enum 對應等
    *********************************************/
   const gateOptions = ['review', 'developmentQA', 'independentQA']
+  const stageLabels: Record<string, string> = {
+    pending_dispatch: '等待派工',
+    spec: '規格整理',
+    plan: '開發計畫',
+    implementation: '實作中',
+    review: '審查中',
+    qa: '品質驗證',
+    delivery_cleanup: '交付清理',
+    completed: '已完成',
+    cancelled: '已取消',
+    unknown: '未知',
+  }
 
   /*********************************************
    * 📂 Category: Refs / Reactive State
@@ -104,6 +116,20 @@
   )
   const hasQaRows = computed<boolean>(() => qaRows.value.length > 0)
   const submitDisabled = computed<boolean>(() => !interventionEditable.value || gate.value === '')
+  const interventionStatus = computed<string>(() => interventionData.value?.status ?? '尚未請求人工接手')
+  const interventionRole = computed<string>(() => interventionData.value?.role ?? '未知')
+  const interventionRound = computed<string>(() => String(interventionData.value?.round ?? '未知'))
+  const interventionBranch = computed<string>(() => interventionData.value?.branch ?? '未知')
+  const interventionPreview = computed<string>(() => interventionData.value?.preview ?? '未知')
+  const interventionProcess = computed<string>(() => interventionData.value?.processId ?? '未知')
+  const interventionWriting = computed<string>(() => interventionData.value?.automaticWriting ?? '未知')
+  const reviewRoundWarning = computed<boolean>(() => (interventionData.value?.round ?? 0) >= 3)
+  const deliveryStatus = computed<string>(() => (state.value?.data.delivery?.status as string) ?? '未知')
+  const deliveryBranch = computed<string>(() => (state.value?.data.delivery?.branch as string) ?? '未知')
+  const deliveryCommit = computed<string>(() => (state.value?.data.delivery?.commit as string) ?? '未知')
+  const deliveryIde = computed<string>(() => (state.value?.data.delivery?.ide as string) ?? '未知')
+  const deliveryCleanup = computed<string>(() => (state.value?.data.delivery?.cleanup as string) ?? '未知')
+
   const diagnostics = computed<unknown>(
     () => interventionData.value?.diagnostics ?? interventionData.value?.evidence ?? null
   )
@@ -224,7 +250,7 @@
       <template v-if="state"
         ><h1>Office 工作詳情</h1>
         <p class="purpose">{{ state.data.task.purpose }}</p>
-        <div class="badge">{{ state.data.stage }} · {{ state.data.activity }}</div>
+        <div class="badge">{{ stageLabels[state.data.stage] ?? '未知' }} · {{ state.data.activity }}</div>
         <v-row
           ><v-col cols="12"
             ><section class="detail-grid">
@@ -249,15 +275,9 @@
                     >
                   </dl>
                 </div>
-                <p>交付：{{ state.data.delivery?.status ?? '未知' }}</p>
-                <p>
-                  Branch：{{ state.data.delivery?.branch ?? '未知' }} · Commit：{{
-                    state.data.delivery?.commit ?? '未知'
-                  }}
-                </p>
-                <p>
-                  IDE：{{ state.data.delivery?.ide ?? '未知' }} · Cleanup：{{ state.data.delivery?.cleanup ?? '未知' }}
-                </p>
+                <p>交付：{{ deliveryStatus }}</p>
+                <p>Branch：{{ deliveryBranch }} · Commit：{{ deliveryCommit }}</p>
+                <p>IDE：{{ deliveryIde }} · Cleanup：{{ deliveryCleanup }}</p>
               </article>
             </section></v-col
           ></v-row
@@ -266,17 +286,13 @@
           ><v-col cols="12"
             ><section>
               <h2>人工接手</h2>
-              <p>狀態：{{ interventionData?.status ?? '尚未請求人工接手' }}</p>
-              <p>角色：{{ interventionData?.role ?? '未知' }} · 回合：{{ interventionData?.round ?? '未知' }}</p>
-              <p>Branch：{{ interventionData?.branch ?? '未知' }} · Worktree：{{ displayWorktree }}</p>
+              <p>狀態：{{ interventionStatus }}</p>
+              <p>角色：{{ interventionRole }} · 回合：{{ interventionRound }}</p>
+              <p>Branch：{{ interventionBranch }} · Worktree：{{ displayWorktree }}</p>
               <p>Diagnostics：{{ diagnosticsText }}</p>
-              <p>
-                Preview：{{ interventionData?.preview ?? '未知' }} · Process：{{
-                  interventionData?.processId ?? '未知'
-                }}
-              </p>
-              <p>自動寫入：{{ interventionData?.automaticWriting ?? '未知' }}</p>
-              <v-alert v-if="(interventionData?.round ?? 0) >= 3" type="warning" variant="tonal"
+              <p>Preview：{{ interventionPreview }} · Process：{{ interventionProcess }}</p>
+              <p>自動寫入：{{ interventionWriting }}</p>
+              <v-alert v-if="reviewRoundWarning" type="warning" variant="tonal"
                 >已達 3 回合 review，請人工確認。</v-alert
               >
               <div class="intervention-form">

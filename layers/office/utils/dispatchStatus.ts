@@ -33,7 +33,7 @@ const statusInfo: Record<DispatchStatus, RoleStatusInfo> = {
   [DispatchStatusEnum.CANCELLED]: { text: '已取消', icon: '!', className: 'is-failed', running: false },
 }
 
-const unknownStatus: RoleStatusInfo = { text: '資料未提供', icon: '?', className: 'is-unknown', running: false }
+const unknownStatus: RoleStatusInfo = { text: '待命', icon: '◷', className: 'is-waiting', running: false }
 
 /*********************************************
  * 📂 Category: Methods

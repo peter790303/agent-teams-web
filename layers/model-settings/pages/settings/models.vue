@@ -111,7 +111,7 @@
               min="0"
               :disabled="editor.loadState === 'failed' || editor.loadState === 'pending'"
             />
-            <ul>
+            <v-list>
               <li v-for="candidate in editor.candidates" :key="id(candidate)">
                 <v-checkbox
                   :model-value="editor.selectedIds.includes(id(candidate))"
@@ -123,8 +123,8 @@
                 <v-text-field v-model="editor.candidateDrafts[id(candidate)].costScore" label="成本" type="number" />
                 <v-text-field v-model="editor.candidateDrafts[id(candidate)].latencyScore" label="延遲" type="number" />
               </li>
-            </ul>
-            <form @submit.prevent="addCandidate(editor)">
+            </v-list>
+            <v-form @submit.prevent="addCandidate(editor)">
               <v-select
                 :model-value="catalogId(editor.draft)"
                 label="Provider 支援模型"
@@ -146,7 +146,7 @@
                 :disabled="editor.loadState === 'failed' || editor.loadState === 'pending' || catalogState !== 'loaded'"
                 >新增候選</v-btn
               >
-            </form>
+            </v-form>
             <p v-if="catalogError" role="alert">{{ catalogError }}</p>
             <p v-else-if="catalogState === 'loaded' && catalog.length === 0">Provider 尚未回傳可用模型</p>
             <v-btn
@@ -162,7 +162,7 @@
         <v-col cols="12" md="6"
           ><section>
             <h2>角色容量</h2>
-            <table>
+            <v-table>
               <tbody>
                 <tr v-for="capacity in capacityRows" :key="capacity.role">
                   <td>{{ capacity.role }}</td>
@@ -170,13 +170,13 @@
                   <td>{{ capacity.availableCapacity }}</td>
                 </tr>
               </tbody>
-            </table>
+            </v-table>
           </section></v-col
         >
         <v-col cols="12"
           ><section class="health">
             <h2>Provider 健康</h2>
-            <table>
+            <v-table>
               <tbody>
                 <tr v-for="entry in healthRows" :key="entry.providerId">
                   <td>{{ entry.providerId }}</td>
@@ -189,7 +189,7 @@
                   <td>{{ entry.observedAtText }}</td>
                 </tr>
               </tbody>
-            </table>
+            </v-table>
           </section></v-col
         >
       </v-row>

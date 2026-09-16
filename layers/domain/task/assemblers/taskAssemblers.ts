@@ -2,7 +2,7 @@
  * 📂 Category: Imports
  * 🔧 Defines: 任務領域型別
  *********************************************/
-import { isTaskStage, TaskStageEnum } from '../enums/TaskStageEnum'
+import { isTaskStage } from '../enums/TaskStageEnum'
 import type { Task } from '../Task'
 
 /*********************************************
@@ -27,7 +27,7 @@ const toTask = (input: TaskWire): Task => {
     id: String(input.id ?? ''),
     purpose: String(input.purpose ?? ''),
     projectId: String(input.projectId ?? ''),
-    stage: isTaskStage(input.stage) ? input.stage : TaskStageEnum.PENDING_DISPATCH,
+    stage: isTaskStage(input.stage) ? input.stage : 'unknown',
     createdAt: typeof input.createdAt === 'string' ? input.createdAt : undefined,
     updatedAt: typeof input.updatedAt === 'string' ? input.updatedAt : undefined,
   }
