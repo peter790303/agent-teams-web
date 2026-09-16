@@ -17,6 +17,21 @@
   }
   type ActivityItem = { text: string; updatedAt: string | null }
   type ResourceItem = { name: string; status?: string; owner?: string; percent?: number }
+  type ActivityPresentation = { key: string; text: string; time: string }
+  type ResourcePresentation = {
+    name: string
+    value: string
+    trackValue: number
+    ariaLabel: string
+    ariaValueText: string
+  }
+  type TaskPresentation = {
+    id: string
+    purpose: string
+    project: string
+    stage: string
+    href: string
+  }
   const stageLabels: Record<string, string> = {
     pending_dispatch: '等待派工',
     spec: '規格整理',
@@ -73,7 +88,7 @@
   const pendingTasks = computed<Task[]>(() =>
     props.tasks.filter((task) => task.stage === TaskStageEnum.PENDING_DISPATCH)
   )
-  const feed = computed<ActivityItem[]>(() => {
+  const feed = computed<ActivityPresentation[]>(() => {
     const source = props.activities.length
       ? props.activities
       : props.tasks.map((task) => ({
@@ -84,7 +99,48 @@
     return [...source]
       .sort((left, right) => Date.parse(right.updatedAt ?? '') - Date.parse(left.updatedAt ?? ''))
       .slice(0, 5)
+      .map((item, index) => ({
+        key: `${item.text}-${index}`,
+        text: item.text,
+        time: formatTime(item.updatedAt),
+      }))
   })
+  const resourceRows = computed<ResourcePresentation[]>(() =>
+    [{ name: 'CPU' }, { name: '記憶體' }, { name: 'Token' }, ...props.resources].map((resource) => {
+      const hasValue = resource.percent !== undefined
+      const value = hasValue ? `${resource.percent}%` : '未知'
+      const trackValue = resource.percent === undefined ? 0 : resource.percent
+
+      return {
+        name: resource.name,
+        value,
+        trackValue,
+        ariaLabel: `${resource.name} 資源狀態：${value}`,
+        ariaValueText: value,
+      }
+    })
+  )
+  const pendingTaskLinks = computed<TaskPresentation[]>(() =>
+    pendingTasks.value.map((task: Task) => ({
+      id: task.id,
+      purpose: task.purpose,
+      project: '',
+      stage: stageLabel(task.stage),
+      href: `/office/tasks/${task.id}`,
+    }))
+  )
+  const taskLinks = computed<TaskPresentation[]>(() =>
+    props.tasks.map((task: Task) => ({
+      id: task.id,
+      purpose: task.purpose,
+      project: task.projectId,
+      stage: stageLabel(task.stage),
+      href: `/office/tasks/${task.id}`,
+    }))
+  )
+  const showEmptyFeed = computed<boolean>(() => feed.value.length === 0)
+  const showEmptyPendingTasks = computed<boolean>(() => pendingTaskLinks.value.length === 0)
+  const showEmptyTasks = computed<boolean>(() => taskLinks.value.length === 0)
   const statsLabel = computed<string | null>(() => {
     if (props.taskLoadStatus === 'success') return null
     if (props.taskLoadStatus === 'loading' || props.taskLoadStatus === 'idle') return '載入中…'
@@ -123,15 +179,11 @@
           >
         </div>
         <div class="feed mt-1">
-          <div
-            v-for="(item, index) in feed"
-            :key="`${item}-${index}`"
-            class="event d-flex align-baseline ga-2 py-1 text-caption"
-          >
-            <time class="flex-shrink-0 text-caption text-textMuted">{{ formatTime(item.updatedAt) }}</time>
+          <div v-for="item in feed" :key="item.key" class="event d-flex align-baseline ga-2 py-1 text-caption">
+            <time class="flex-shrink-0 text-caption text-textMuted">{{ item.time }}</time>
             <p class="ma-0 text-caption text-textMuted">{{ item.text }}</p>
           </div>
-          <div v-if="!feed.length" class="empty d-flex flex-column ga-1 py-1 text-caption text-textMuted">
+          <div v-if="showEmptyFeed" class="empty d-flex flex-column ga-1 py-1 text-caption text-textMuted">
             <strong class="text-caption text-high-emphasis">今天，從一個想法開始</strong
             ><span>團隊已就位，等待你的第一項工作。</span>
           </div>
@@ -159,33 +211,29 @@
         <h2 class="ma-0 text-body-2 font-weight-bold">待處理</h2>
         <div class="task-list d-flex flex-column ga-1 mt-1">
           <NuxtLink
-            v-for="task in pendingTasks"
+            v-for="task in pendingTaskLinks"
             :key="task.id"
             class="task-item d-flex flex-column pa-2 bg-taskSurface text-caption"
-            :to="`/office/tasks/${task.id}`"
+            :to="task.href"
           >
             <strong>{{ task.purpose }}</strong
-            ><small>{{ stageLabel(task.stage) }}</small>
+            ><small>{{ task.stage }}</small>
           </NuxtLink>
-          <p v-if="!pendingTasks.length" class="empty ma-0 py-1 text-caption text-textMuted">目前沒有待處理任務</p>
+          <p v-if="showEmptyPendingTasks" class="empty ma-0 py-1 text-caption text-textMuted">目前沒有待處理任務</p>
         </div>
       </section>
       <section class="command-section px-3 py-2 border-b border-border">
         <h2 class="ma-0 text-body-2 font-weight-bold">系統資源</h2>
         <div class="resource-list mt-1">
-          <div
-            v-for="resource in [{ name: 'CPU' }, { name: '記憶體' }, { name: 'Token' }, ...props.resources]"
-            :key="resource.name"
-            class="resource-row text-caption"
-          >
+          <div v-for="resource in resourceRows" :key="resource.name" class="resource-row text-caption">
             <span>{{ resource.name }}</span
-            ><span>{{ resource.percent === undefined ? '未知' : `${resource.percent}%` }}</span>
+            ><span>{{ resource.value }}</span>
             <v-progress-linear
-              :model-value="resource.percent ?? 0"
+              :model-value="resource.trackValue"
               color="warning"
               height="4"
-              :aria-label="`${resource.name} 資源狀態：${resource.percent === undefined ? '未知' : `${resource.percent}%`}`"
-              :aria-valuetext="resource.percent === undefined ? '未知' : `${resource.percent}%`"
+              :aria-label="resource.ariaLabel"
+              :aria-valuetext="resource.ariaValueText"
             />
           </div>
         </div>
@@ -204,12 +252,8 @@
         >
       </div>
       <div class="feed mt-1">
-        <div
-          v-for="(item, index) in feed"
-          :key="`${item}-${index}`"
-          class="event d-flex align-baseline ga-2 py-1 text-caption"
-        >
-          <time class="flex-shrink-0 text-caption text-textMuted">{{ formatTime(item.updatedAt) }}</time>
+        <div v-for="item in feed" :key="item.key" class="event d-flex align-baseline ga-2 py-1 text-caption">
+          <time class="flex-shrink-0 text-caption text-textMuted">{{ item.time }}</time>
           <p class="ma-0 text-caption text-textMuted">{{ item.text }}</p>
         </div>
       </div>
@@ -228,14 +272,14 @@
       </div>
       <div class="task-list d-flex flex-column ga-1 mt-1">
         <NuxtLink
-          v-for="task in props.tasks"
+          v-for="task in taskLinks"
           :key="task.id"
           class="task-item d-flex flex-column pa-2 bg-taskSurface text-caption"
-          :to="`/office/tasks/${task.id}`"
+          :to="task.href"
           ><strong>{{ task.purpose }}</strong
-          ><small>{{ task.projectId }} · {{ stageLabel(task.stage) }}</small></NuxtLink
+          ><small>{{ task.project }} · {{ task.stage }}</small></NuxtLink
         >
-        <div v-if="!props.tasks.length" class="empty py-1 text-caption text-textMuted">目前沒有任務</div>
+        <div v-if="showEmptyTasks" class="empty py-1 text-caption text-textMuted">目前沒有任務</div>
       </div>
     </section>
   </aside>
