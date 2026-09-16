@@ -23,4 +23,4 @@
 
 ## Nest client 認證
 
-前端 `.env` 的 `NEST_API_KEY` 自動供 API repository 使用，頁面不提供手動輸入或 sessionStorage 覆寫。Docker 將它映射到 `NUXT_PUBLIC_NEST_API_KEY`；修改後須重啟服務。這是瀏覽器直接呼叫 Nest 的 client 憑證，瀏覽器可取得其值，不是上游模型供應商的 secret。Nest 以資料庫 `client` 記錄驗證憑證。缺少設定或 client 未授權時顯示設定錯誤；上游 provider 的 401 仍依 provider 錯誤呈現。
+前端 `.env` 的 `NEST_API_KEY` 自動供 API repository 使用，頁面不提供手動輸入或 sessionStorage 覆寫。Docker 將它映射到 `NUXT_PUBLIC_NEST_API_KEY`；修改後須重啟服務。這是瀏覽器直接呼叫 Nest 的 client 憑證，瀏覽器可取得其值，不是上游模型供應商的 secret。Nest 以資料庫 `client` 記錄驗證憑證。缺少設定或 client 未授權時由既有 repository 與頁面錯誤處理呈現；上游 provider 的 401 仍依 provider 錯誤呈現。
