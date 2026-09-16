@@ -132,3 +132,17 @@
 - 前次視覺驗收的 `Page.captureScreenshot` 持續 CDP timeout，沒有截圖證據。
 - `1852749` 的最新瀏覽器驗證曾被 Ego user takeover 暫停；使用者已批准繼續，主 agent 正進行新版 runtime 驗證，本紀錄不以舊版 runtime 宣稱新版 PASS。
 - 本紀錄只保存程式修復與已執行檢查；完整 DOM、console、390／768／1280 與端到端流程待主 agent 本輪驗證結果補入。
+
+## 50f8cf9 Template 規範補修（2026-09-16）
+
+使用者指出 `7a19dc9` 後 `CommandCenter.vue` 仍把資源 fallback、ARIA 字串與進度值寫在 template，違反 FrontEnd/06「Template 只做宣告式渲染」規範（06:24、06:112）。本次修復提交為 `50f8cf91c6daa895b5e3186634d715858917b2cd`，未 merge、未改寫原兩軸 review fixed point。
+
+- 新增顯式型別 `ActivityPresentation`、`ResourcePresentation`、`TaskPresentation`。
+- `feed` computed 提供 `key`、`text`、`time`；template 直接綁定 `item.key`、`item.text`、`item.time`。
+- `resourceRows` computed 提供 `name`、`value`、`trackValue`、`ariaLabel`、`ariaValueText`；template 直接綁定上述欄位。未知值保留「未知」，`trackValue: 0` 僅表示空軌道。
+- `pendingTaskLinks`／`taskLinks` computed 提供 `id`、`purpose`、`project`、`stage`、`href`；template 直接綁定 `task.href`、`task.purpose`、`task.project`、`task.stage`。
+- `showEmptyFeed`、`showEmptyPendingTasks`、`showEmptyTasks` computed 提供空狀態條件，移除 template 內長度判斷。
+
+FrontEnd/04「程式表達慣例」要求 TypeScript 與 `computed` 明確型別，並將 template 邏輯提取至 computed；本次欄位整理依此與 FrontEnd/06 一併完成。檢查 `npm run typecheck`、元件 ESLint、Prettier check、`git diff --check`、`npm run build` 均 exit 0。Docker 未因本文件重建；50f8cf9 已於前一修復流程重建 30679 並由 root runtime follow-up 驗證。
+
+Runtime 證據見 `.scratch/office-acceptance/repair-runtime-followup.md`：browser takeover 與 screenshot 阻礙已解除，首頁 console 為 0、390／768／1280 無整頁溢出、手機 roster 可水平捲動；此處不將 follow-up 結果表述為 50f8cf9 全部功能的重新驗收。外部 provider `localhost:4000` 仍無服務，完整 provider-backed 驗收維持 BLOCKED；原 `9e36fd2` 兩軸 review 的 FAIL 紀錄保留。
