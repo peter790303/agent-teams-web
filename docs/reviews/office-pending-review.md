@@ -101,3 +101,34 @@
 - 完整核心操作流程與 QA，依使用者指示保留待後續額度恢復驗收。
 
 `.scratch/` 為本機暫存，不納入提交；正式報告已保存至本目錄。
+
+## 1852749 修復驗收紀錄（2026-09-16，尚未通過正式驗收）
+
+本節承接 fixed point `9e36fd2` 的兩軸 FAIL（Claude Spec 與 Sol Standards）。修復已提交於 `1852749581834ac114b51fa5ee03233ab3982b75`，未 merge。
+
+| 原始 finding                                                                                        | `1852749` 修復對照                                                                                                                         |
+| --------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| API task state、intervention、action 與 model catalog 在 repository 直接轉出，未經 Domain Assembler | 新增 task state assembler 與 model catalog domain assembler；office task repository 與 model-settings repository 改由 assembler 邊界轉換。 |
+| `useOffice` 使用 `idle/loading/success/error` 字串 union                                            | 新增並使用 `OfficeLoadStatusEnum`，保留 loading、成功與錯誤語意。                                                                          |
+| 未知 stage 被當成 pending，或 UI 顯示英文／不明 fallback                                            | domain parser 保留 `unknown`；Office stage label 統一中文，未知資料顯示「未知」。                                                          |
+| CPU、memory、token 缺值以數字填充，可能偽造 100%                                                    | Command Center 資源列依 API 真實欄位顯示，缺值為「未知」，不計算虛假百分比。                                                               |
+| feed 未依真實更新時間排序或格式化                                                                   | feed 依 `updatedAt` 新到舊排序並以 zh-TW 時間格式顯示。                                                                                    |
+| 取消任務被計入錯誤；已知角色無派工與 API 讀取失敗混淆                                               | cancelled 不列入錯誤統計；角色待命、資料未提供與 API error 分開呈現。                                                                      |
+| roster 有多餘 `>`，手機卡片無法水平瀏覽                                                             | 移除多餘字元；手機 roster 保留水平滑動。                                                                                                   |
+| detail template 含業務判斷、交付／intervention 資訊不足                                             | delivery branch、commit、IDE、cleanup、intervention preview/process/automaticWriting 與第三回合提示移至 computed 並呈現。                  |
+| settings models 使用原生互動／列表結構與型別、Category 問題                                         | 表單、列表與表格互動改用 Vuetify 元件；補 domain 型別與 assembler，保留必要語義 HTML。                                                     |
+
+### 驗證證據
+
+- `npm run typecheck`：exit 0。
+- `npm run lint`：exit 0；3 個 `vue/no-v-html` warning（既有 PixelOfficeMap 與 WorkstationRoster 使用），無 error。
+- `npm run format:check`：exit 0。
+- `npm run build`：exit 0。
+- `docker compose build agent-teams-web`：exit 0；`docker compose up -d agent-teams-web` 完成，容器為 Up，`curl http://127.0.0.1:30679/` 回 HTTP 200。容器環境 `NUXT_PUBLIC_API_BASE=http://localhost:30678`，未修改 backend/provider。
+
+### 未通過與限制
+
+- 正式驗收尚未通過。外部 provider endpoint `localhost:4000` 無服務，無法取得完整 provider-backed runtime 資料。
+- 前次視覺驗收的 `Page.captureScreenshot` 持續 CDP timeout，沒有截圖證據。
+- `1852749` 的最新瀏覽器驗證曾被 Ego user takeover 暫停；使用者已批准繼續，主 agent 正進行新版 runtime 驗證，本紀錄不以舊版 runtime 宣稱新版 PASS。
+- 本紀錄只保存程式修復與已執行檢查；完整 DOM、console、390／768／1280 與端到端流程待主 agent 本輪驗證結果補入。
