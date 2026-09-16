@@ -181,11 +181,11 @@
             <span>{{ resource.name }}</span
             ><span>{{ resource.percent === undefined ? '未知' : `${resource.percent}%` }}</span>
             <v-progress-linear
-              v-if="resource.percent !== undefined"
-              :model-value="resource.percent"
+              :model-value="resource.percent ?? 0"
               color="warning"
               height="4"
-              aria-label="資源狀態"
+              :aria-label="`${resource.name} 資源狀態：${resource.percent === undefined ? '未知' : `${resource.percent}%`}`"
+              :aria-valuetext="resource.percent === undefined ? '未知' : `${resource.percent}%`"
             />
           </div>
         </div>
