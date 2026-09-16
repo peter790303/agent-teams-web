@@ -3,7 +3,8 @@
    * 📂 Category: Imports
    * 🔧 Defines: 引入任務型別
    *********************************************/
-  import type { Task } from '~/layers/office/types'
+  import { TaskStageEnum } from '~/layers/domain/task/enums/TaskStageEnum'
+  import type { Execution, Task } from '~/layers/office/types'
 
   /*********************************************
    * 📂 Category: Interface
@@ -15,6 +16,8 @@
     failed: number
     running: number
   }
+  type ActivityItem = { text: string; updatedAt: string | null }
+  type ResourceItem = { name: string; status?: string; owner?: string }
 
   /*********************************************
    * 📂 Category: Props / Emits
@@ -22,7 +25,9 @@
    *********************************************/
   const props = defineProps<{
     tasks: Task[]
-    activities: string[]
+    activities: ActivityItem[]
+    resources: ResourceItem[]
+    executions: Execution[]
     taskLoadStatus: 'idle' | 'loading' | 'success' | 'error'
   }>()
 
@@ -37,16 +42,25 @@
    * 🔧 Defines: 指揮中心的統計與動態資料
    *********************************************/
   const stats = computed<CommandStats>(() => ({
-    completed: props.tasks.filter((task) => /completed|succeeded|完成/i.test(task.stage)).length,
-    waiting: props.tasks.filter((task) => /pending|等待|queued/i.test(task.stage)).length,
-    failed: props.tasks.filter((task) => /failed|失敗|error/i.test(task.stage)).length,
-    running: props.tasks.filter((task) => /running|active|執行中/i.test(task.stage)).length,
+    completed: props.tasks.filter((task) => task.stage === TaskStageEnum.COMPLETED).length,
+    waiting: props.tasks.filter((task) => task.stage === TaskStageEnum.PENDING_DISPATCH).length,
+    failed: props.tasks.filter((task) => task.stage === TaskStageEnum.CANCELLED).length,
+    running: props.tasks.filter(
+      (task) =>
+        ![TaskStageEnum.COMPLETED, TaskStageEnum.CANCELLED, TaskStageEnum.PENDING_DISPATCH].includes(
+          task.stage as TaskStageEnum
+        )
+    ).length,
   }))
-  const pendingTasks = computed<Task[]>(() => props.tasks.filter((task) => /pending|等待|queued/i.test(task.stage)))
-  const feed = computed<string[]>(() =>
+  const pendingTasks = computed<Task[]>(() =>
+    props.tasks.filter((task) => task.stage === TaskStageEnum.PENDING_DISPATCH)
+  )
+  const feed = computed<ActivityItem[]>(() =>
     props.activities.length
       ? props.activities
-      : props.tasks.slice(0, 5).map((task) => `${task.purpose} · ${task.stage}`)
+      : props.tasks
+          .slice(0, 5)
+          .map((task) => ({ text: `${task.purpose} · ${task.stage}`, updatedAt: task.updatedAt ?? null }))
   )
   const statsLabel = computed<string | null>(() => {
     if (props.taskLoadStatus === 'success') return null
@@ -91,8 +105,8 @@
             :key="`${item}-${index}`"
             class="event d-flex align-baseline ga-2 py-1 text-caption"
           >
-            <time class="flex-shrink-0 text-caption text-textMuted">資料未提供</time>
-            <p class="ma-0 text-caption text-textMuted">{{ item }}</p>
+            <time class="flex-shrink-0 text-caption text-textMuted">{{ item.updatedAt ?? '未知' }}</time>
+            <p class="ma-0 text-caption text-textMuted">{{ item.text }}</p>
           </div>
           <div v-if="!feed.length" class="empty d-flex flex-column ga-1 py-1 text-caption text-textMuted">
             <strong class="text-caption text-high-emphasis">今天，從一個想法開始</strong
@@ -139,7 +153,19 @@
       </section>
       <section class="command-section px-3 py-2 border-b border-border">
         <h2 class="ma-0 text-body-2 font-weight-bold">系統資源</h2>
-        <p class="notice ma-0 mt-1 text-caption text-textMuted">資料未提供</p>
+        <div v-if="props.resources.length" class="resource-list mt-1">
+          <div v-for="resource in props.resources" :key="resource.name" class="resource-row text-caption">
+            <span>{{ resource.name }}</span
+            ><span>{{ resource.status ?? '未知' }}</span>
+            <v-progress-linear
+              :model-value="resource.status === 'active' ? 100 : 0"
+              color="warning"
+              height="4"
+              aria-label="資源狀態"
+            />
+          </div>
+        </div>
+        <p v-else class="notice ma-0 mt-1 text-caption text-textMuted">未知</p>
       </section>
     </template>
     <section v-else-if="tab === 'activity'" class="command-section px-3 py-2 border-b border-border">
@@ -160,8 +186,8 @@
           :key="`${item}-${index}`"
           class="event d-flex align-baseline ga-2 py-1 text-caption"
         >
-          <time class="flex-shrink-0 text-caption text-textMuted">資料未提供</time>
-          <p class="ma-0 text-caption text-textMuted">{{ item }}</p>
+          <time class="flex-shrink-0 text-caption text-textMuted">{{ item.updatedAt ?? '未知' }}</time>
+          <p class="ma-0 text-caption text-textMuted">{{ item.text }}</p>
         </div>
       </div>
     </section>

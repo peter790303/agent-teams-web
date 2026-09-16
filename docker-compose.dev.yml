@@ -4,7 +4,7 @@ services:
       context: .
       dockerfile: docker/22/Dockerfile.dev
     ports:
-      - "127.0.0.1:30679:30679"
+      - '127.0.0.1:30679:30679'
     environment:
       NUXT_PUBLIC_API_BASE: ${NUXT_PUBLIC_API_BASE:-http://localhost:30678}
       PORT: 30679

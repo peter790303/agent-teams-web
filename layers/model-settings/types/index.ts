@@ -1,8 +1,20 @@
+/*********************************************
+ * 📂 Category: Imports
+ * 🔧 Defines: 模型設定型別依賴
+ *********************************************/
 import type { Ref } from 'vue'
 
+/*********************************************
+ * 📂 Category: Imports
+ * 🔧 Defines: 領域型別匯出
+ *********************************************/
 export type { Role } from '~/layers/domain/types'
 export type { Model as ModelCandidate } from '~/layers/domain/model/Model'
 export type { Capacity, HealthEntry, Policy, PolicyData } from '~/layers/domain/model-settings/ModelSettings'
+/*********************************************
+ * 📂 Category: Interface
+ * 🔧 Defines: 模型設定頁面資料結構
+ *********************************************/
 export interface ModelCatalog {
   providerId: string
   modelId: string

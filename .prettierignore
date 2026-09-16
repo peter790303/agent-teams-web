@@ -1,0 +1,5 @@
+.scratch/
+.claude-flow/
+node_modules/
+.nuxt/
+.output/

@@ -1,14 +1,14 @@
 <script setup lang="ts">
-/*********************************************
- * 📂 Category: Props / Emits
- * 🔧 Defines: 元件輸入參數
- *********************************************/
-withDefaults(
-  defineProps<{
-    maxWidth?: string | number
-  }>(),
-  { maxWidth: 1380 },
-)
+  /*********************************************
+   * 📂 Category: Props / Emits
+   * 🔧 Defines: 元件輸入參數
+   *********************************************/
+  withDefaults(
+    defineProps<{
+      maxWidth?: string | number
+    }>(),
+    { maxWidth: 1380 }
+  )
 </script>
 
 <template>

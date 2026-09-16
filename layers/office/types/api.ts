@@ -4,6 +4,7 @@
  *********************************************/
 import type { ComputedRef, Ref } from 'vue'
 
+import type { TaskStageEnum } from '~/layers/domain/task/enums/TaskStageEnum'
 import type { Task } from '~/layers/domain/task/Task'
 import type { DispatchStatus } from '~/layers/domain/task/types/DispatchStatus'
 
@@ -49,15 +50,28 @@ export interface SubmitTaskPayload {
 export interface TaskStateData {
   task: Task
   revision: number
-  stage: string
+  stage: TaskStageEnum
   activity: string
+  updatedAt?: string
   dispatches: Dispatch[]
-  executions: Record<string, unknown>[]
+  executions: Execution[]
   spec: Record<string, unknown> | null
   plan: Record<string, unknown> | null
   workspace: Record<string, unknown> | null
   qaReport: Record<string, unknown> | null
   delivery: Record<string, unknown> | null
+}
+export interface Execution {
+  id?: string
+  role?: string
+  status?: string
+  updatedAt?: string
+  createdAt?: string
+  [key: string]: unknown
+}
+export interface ActivityItem {
+  text: string
+  updatedAt: string | null
 }
 export interface TaskState {
   data: TaskStateData
@@ -67,6 +81,10 @@ export interface Intervention {
   blockers?: string[]
   instruction?: string
   worktree?: string
+  processId?: string
+  preview?: string
+  automaticWriting?: string
+  round?: number
 }
 export interface ResumeTaskCommand {
   id: string

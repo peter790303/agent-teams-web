@@ -30,7 +30,9 @@
     'is-medium': mdAndDown.value,
     'is-mobile': xs.value,
   }))
-  const employees = computed(() =>
+  const employees = computed<
+    Array<(typeof roles)[number] & ReturnType<typeof getRoleStatusInfo> & { avatarSvg: string }>
+  >(() =>
     roles.map((person) => ({
       ...person,
       ...getRoleStatusInfo(props.roleStatuses[person.id]),
@@ -67,6 +69,12 @@
           ><span class="state" :class="person.className"
             ><span aria-hidden="true">{{ person.icon }}</span
             >{{ person.text }}</span
+          ><v-progress-linear
+            :model-value="person.running ? 100 : 0"
+            color="warning"
+            height="3"
+            aria-label="員工工作狀態"
+          />
           ></span
         >
       </v-btn>

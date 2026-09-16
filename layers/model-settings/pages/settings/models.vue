@@ -28,6 +28,13 @@
   }
 
   /*********************************************
+   * 📂 Category: Methods
+   * 🔧 Defines: 模型顯示文字與表單事件
+   *********************************************/
+  const candidateLabel = (candidate: { providerId: string; modelId: string }): string =>
+    `${candidate.providerId}/${candidate.modelId}`
+
+  /*********************************************
    * 📂 Category: Composables / Plugins
    * 🔧 Defines: 自定 composables、Pinia 狀態、i18n、plugin 等注入來源
    *********************************************/
@@ -76,13 +83,6 @@
       observedAtText: `${entry.isStale ? '過期' : '新鮮'} · ${entry.observedAt}`,
     }))
   )
-
-  /*********************************************
-   * 📂 Category: Methods
-   * 🔧 Defines: 定義函數與事件處理
-   *********************************************/
-  const candidateLabel = (candidate: { providerId: string; modelId: string }): string =>
-    `${candidate.providerId}/${candidate.modelId}`
 
   /*********************************************
    * 📂 Category: Lifecycle Hooks

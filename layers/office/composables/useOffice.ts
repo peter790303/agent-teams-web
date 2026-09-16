@@ -3,6 +3,7 @@
  * 🔧 Defines: 引入必要的模組和庫
  *********************************************/
 import { DispatchStatusEnum } from '~/layers/domain/task/enums/DispatchStatusEnum'
+import { TaskStageEnum } from '~/layers/domain/task/enums/TaskStageEnum'
 import type { DispatchStatus } from '~/layers/domain/task/types/DispatchStatus'
 import {
   createTask,
@@ -35,8 +36,8 @@ export const useOffice = (): OfficeComposable => {
    * 📂 Category: Computed
    * 🔧 Defines: 定義計算屬性
    *********************************************/
-  const roleStatuses = computed<Record<string, DispatchStatus>>(() =>
-    taskStates.value.reduce<Record<string, DispatchStatus>>((statuses, state) => {
+  const roleStatuses = computed<Record<string, DispatchStatus>>(() => {
+    const statuses = taskStates.value.reduce<Record<string, DispatchStatus>>((next, state) => {
       return state.data.dispatches.reduce<Record<string, DispatchStatus>>((nextStatuses, dispatch) => {
         const next = dispatch.status
         const previous = nextStatuses[dispatch.role]
@@ -45,9 +46,24 @@ export const useOffice = (): OfficeComposable => {
         if (previous === undefined || running || !previousRunning) nextStatuses[dispatch.role] = next
 
         return nextStatuses
-      }, statuses)
+      }, next)
     }, {})
-  )
+    const stageRoles: Partial<Record<TaskStageEnum, string>> = {
+      [TaskStageEnum.SPEC]: 'pm',
+      [TaskStageEnum.PLAN]: 'rd_leader',
+      [TaskStageEnum.IMPLEMENTATION]: 'rd',
+      [TaskStageEnum.REVIEW]: 'review',
+      [TaskStageEnum.QA]: 'qa',
+      [TaskStageEnum.DELIVERY_CLEANUP]: 'delivery',
+    }
+
+    return taskStates.value.reduce<Record<string, DispatchStatus>>((next, state) => {
+      const role = stageRoles[state.data.stage]
+      if (role && next[role] === undefined) next[role] = DispatchStatusEnum.DISPATCHED
+
+      return next
+    }, statuses)
+  })
 
   /*********************************************
    * 📂 Category: Methods

@@ -8,5 +8,4 @@ The full diff also follows the applicable standards: status values are centraliz
 
 This was a read-only source review of the pinned artifact. Per the review prompt, I did not run ESLint, typecheck, tests, build, or browser QA.
 
-
 Fixed point: `19be5ca..b1158bd9db8325c99bda9b0b6b00938f64cdf57c`。本報告僅涵蓋此範圍；不代表完整 QA 或 master 整合通過。

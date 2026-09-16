@@ -7,7 +7,7 @@
   import type { TaskState } from '~/layers/office/types'
 
   /*********************************************
-   * 📂 Category: Page Meta
+   * 📂 Category: Page Meta  (Nuxt only)
    * 🔧 Defines: 以 definePageMeta() 宣告的頁面層級設定
    *********************************************/
   useSeoMeta({ title: 'Office 工作詳情' })
@@ -29,6 +29,9 @@
     diagnostics?: unknown
     failedReviewRounds?: number
     extraReviewRoundAllowance?: string
+    processId?: string
+    preview?: string
+    automaticWriting?: string
   }
 
   /*********************************************
@@ -69,6 +72,19 @@
   const taskId = String(route.params.id)
 
   /*********************************************
+   * 📂 Category: Methods
+   * 🔧 Defines: 顯示 API 未知值
+   *********************************************/
+  const readableValue = (value: unknown): string =>
+    typeof value === 'string'
+      ? value
+      : typeof value === 'number' || typeof value === 'boolean'
+        ? String(value)
+        : value === null || value === undefined
+          ? '未知'
+          : JSON.stringify(value, null, 2)
+
+  /*********************************************
    * 📂 Category: Provide / Inject
    * 🔧 Defines: 提供給下層或自上層注入的值
    *********************************************/
@@ -78,20 +94,10 @@
    * 🔧 Defines: 定義計算屬性
    *********************************************/
   const interventionData = computed<InterventionView | null>(() =>
-    intervention.value?.data === null || intervention.value?.data === undefined
-      ? null
-      : (intervention.value.data as InterventionView)
+    intervention.value?.data === null || intervention.value?.data === undefined ? null : intervention.value.data
   )
   const interventionEditable = computed<boolean>(() => interventionData.value?.editable === true)
-  const readableValue = (value: unknown): string =>
-    typeof value === 'string'
-      ? value
-      : typeof value === 'number' || typeof value === 'boolean'
-        ? String(value)
-        : value === null || value === undefined
-          ? '未知'
-          : JSON.stringify(value, null, 2)
-  const qaRows = computed(() =>
+  const qaRows = computed<Array<{ label: string; value: string }>>(() =>
     state.value?.data.qaReport === null || state.value?.data.qaReport === undefined
       ? []
       : Object.entries(state.value.data.qaReport).map(([label, value]) => ({ label, value: readableValue(value) }))
@@ -103,13 +109,13 @@
   )
   const displayWorktree = computed<string>(() => interventionData.value?.worktree ?? (worktree.value || '未知'))
   const diagnosticsText = computed(() => readableValue(diagnostics.value))
-  const dispatchLines = computed(
+  const dispatchLines = computed<string[]>(
     () => state.value?.data.dispatches.map((dispatch: DispatchView) => `${dispatch.role} · ${dispatch.status}`) ?? []
   )
-  const blockers = computed(
+  const blockers = computed<string[]>(
     () => state.value?.data.dispatches.flatMap((dispatch: DispatchView) => dispatch.blockedReasons) ?? []
   )
-  const summary = computed(() =>
+  const summary = computed<string[]>(() =>
     state.value === null
       ? []
       : [
@@ -199,7 +205,7 @@
     }
     try {
       intervention.value = await getIntervention(taskId)
-      const data = intervention.value?.data as InterventionView | null | undefined
+      const data = intervention.value?.data
       worktree.value = data?.worktree ?? ''
       commit.value = data?.commit ?? ''
       failedReviewRounds.value = data?.round ?? 0
@@ -243,7 +249,15 @@
                     >
                   </dl>
                 </div>
-                <p>交付：{{ state.data.delivery?.status ?? '尚未建立' }}</p>
+                <p>交付：{{ state.data.delivery?.status ?? '未知' }}</p>
+                <p>
+                  Branch：{{ state.data.delivery?.branch ?? '未知' }} · Commit：{{
+                    state.data.delivery?.commit ?? '未知'
+                  }}
+                </p>
+                <p>
+                  IDE：{{ state.data.delivery?.ide ?? '未知' }} · Cleanup：{{ state.data.delivery?.cleanup ?? '未知' }}
+                </p>
               </article>
             </section></v-col
           ></v-row
@@ -256,6 +270,15 @@
               <p>角色：{{ interventionData?.role ?? '未知' }} · 回合：{{ interventionData?.round ?? '未知' }}</p>
               <p>Branch：{{ interventionData?.branch ?? '未知' }} · Worktree：{{ displayWorktree }}</p>
               <p>Diagnostics：{{ diagnosticsText }}</p>
+              <p>
+                Preview：{{ interventionData?.preview ?? '未知' }} · Process：{{
+                  interventionData?.processId ?? '未知'
+                }}
+              </p>
+              <p>自動寫入：{{ interventionData?.automaticWriting ?? '未知' }}</p>
+              <v-alert v-if="(interventionData?.round ?? 0) >= 3" type="warning" variant="tonal"
+                >已達 3 回合 review，請人工確認。</v-alert
+              >
               <div class="intervention-form">
                 <v-text-field v-model="instruction" :disabled="!interventionEditable" label="接手指令" /><v-text-field
                   v-model="worktree"

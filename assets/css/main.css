@@ -130,11 +130,10 @@ h1 small {
   position: relative;
   min-height: 620px;
   overflow: hidden;
-  background: #6b8c84;
-  background: rgb(var(--v-theme-map-surface, 107, 140, 132));
-  border: 10px solid #d3c4a8;
-  border-color: rgb(var(--v-theme-map-border, 211, 196, 168));
-  box-shadow: inset 0 0 0 4px rgb(var(--v-theme-room-border, 110, 119, 113));
+  background: rgb(var(--v-theme-map-surface));
+  border: 10px solid rgb(var(--v-theme-map-border));
+  border-color: rgb(var(--v-theme-map-border));
+  box-shadow: inset 0 0 0 4px rgb(var(--v-theme-room-border));
   image-rendering: pixelated;
 }
 .pixel-map::after {
@@ -143,7 +142,7 @@ h1 small {
   inset: 0;
   pointer-events: none;
   border: 3px solid rgb(var(--v-theme-room-border));
-  box-shadow: inset 0 0 0 8px rgba(32, 38, 45, 0.18);
+  box-shadow: inset 0 0 0 8px rgb(var(--v-theme-room-text) / 18%);
 }
 .window {
   position: absolute;
@@ -740,8 +739,8 @@ th {
 
 /* Canonical office illustration styles. Keep selectors scoped to prevent Vuetify/base collisions. */
 .office-card {
-  border: 1px solid #303638;
-  background: #1b2221;
+  border: 1px solid rgb(var(--v-theme-room-border));
+  background: rgb(var(--v-theme-surface));
   border-radius: 8px;
   overflow: hidden;
 }
@@ -751,17 +750,17 @@ th {
   align-items: center;
   justify-content: space-between;
   padding: 0 16px;
-  border-bottom: 1px solid #303638;
+  border-bottom: 1px solid rgb(var(--v-theme-room-border));
   font-size: 11px;
   letter-spacing: 1px;
 }
 .office-card .section-bar small {
   font-size: 10px;
-  color: #88928c;
+  color: rgb(var(--v-theme-text-muted));
 }
 .office-card .map-wrap {
   padding: 13px;
-  background: #222825;
+  background: rgb(var(--v-theme-surface-alt));
 }
 .office-card .map {
   position: relative;
@@ -771,7 +770,7 @@ th {
   display: block;
   width: 100%;
   height: auto;
-  filter: drop-shadow(0 4px 3px #0004);
+  filter: drop-shadow(0 4px 3px rgb(var(--v-theme-room-text) / 25%));
 }
 .office-card .person {
   position: absolute;
@@ -792,7 +791,7 @@ th {
   display: block;
   width: 20%;
   height: auto;
-  filter: drop-shadow(2px 3px 0 #0003);
+  filter: drop-shadow(2px 3px 0 rgb(var(--v-theme-room-text) / 20%));
   margin-bottom: 3px;
 }
 .office-card .person-avatar svg {
@@ -802,11 +801,11 @@ th {
 }
 .office-card .person-label {
   margin-top: 2px;
-  background: #263c32dd;
-  border: 1px solid #a9bd802a;
+  background: rgb(var(--v-theme-task-surface) / 87%);
+  border: 1px solid rgb(var(--v-theme-accent) / 16%);
   border-radius: 3px;
   padding: 2px 5px;
-  color: #e6e4d6;
+  color: rgb(var(--v-theme-text));
   white-space: nowrap;
   font-size: clamp(7px, 0.58vw, 9px);
   line-height: 1.2;
@@ -814,7 +813,7 @@ th {
 }
 .office-card .person-label small {
   display: block;
-  color: #88928c;
+  color: rgb(var(--v-theme-text-muted));
   font-size: clamp(6px, 0.5vw, 8px);
   line-height: 1.2;
 }
@@ -842,8 +841,8 @@ th {
 }
 .office-card .person:hover .person-label,
 .office-card .person:focus-visible .person-label {
-  background: #192e22;
-  outline: 1px solid #c8d7a1;
+  background: rgb(var(--v-theme-input-surface));
+  outline: 1px solid rgb(var(--v-theme-accent));
 }
 .office-card .map-footer {
   display: flex;
@@ -851,7 +850,7 @@ th {
   justify-content: space-between;
   gap: 10px;
   padding: 10px 15px;
-  color: #88928c;
+  color: rgb(var(--v-theme-text-muted));
   font-size: 10px;
 }
 .office-card .legend .dot {
@@ -860,13 +859,13 @@ th {
   height: 5px;
   border-radius: 50%;
   margin-right: 4px;
-  background: #7f8c7c;
+  background: rgb(var(--v-theme-room-border));
 }
 .office-card .legend .running {
-  background: #acc47d;
+  background: rgb(var(--v-theme-accent));
 }
 .office-card .legend .waiting {
-  background: #d3b16f;
+  background: rgb(var(--v-theme-warning));
 }
 .roster {
   display: block;
@@ -886,9 +885,9 @@ th {
   align-items: center;
   gap: 9px;
   min-width: 0;
-  border: 1px solid #323b39;
+  border: 1px solid rgb(var(--v-theme-room-border));
   border-radius: 5px;
-  background: linear-gradient(135deg, #242c2c, #1a2022);
+  background: linear-gradient(135deg, rgb(var(--v-theme-surface-alt)), rgb(var(--v-theme-surface)));
   padding: 8px 9px;
   text-align: left;
   min-height: 82px;
@@ -896,7 +895,7 @@ th {
   overflow: hidden;
 }
 .roster .employee.is-active {
-  border-color: #8eaa69;
+  border-color: rgb(var(--v-theme-accent));
 }
 .roster .employee-avatar {
   display: block;
@@ -921,7 +920,7 @@ th {
 }
 .roster .employee small {
   font: 9px monospace;
-  color: #88928c;
+  color: rgb(var(--v-theme-text-muted));
 }
 .roster .employee .state {
   font-size: 9px;

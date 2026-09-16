@@ -2,10 +2,11 @@
  * 📂 Category: Imports
  * 🔧 Defines: 任務領域型別
  *********************************************/
+import { isTaskStage, TaskStageEnum } from '../enums/TaskStageEnum'
 import type { Task } from '../Task'
 
 /*********************************************
- * 📂 Category: Interfaces
+ * 📂 Category: Interface
  * 🔧 Defines: 任務 API 輸入型別
  *********************************************/
 export interface TaskWire {
@@ -26,7 +27,7 @@ const toTask = (input: TaskWire): Task => {
     id: String(input.id ?? ''),
     purpose: String(input.purpose ?? ''),
     projectId: String(input.projectId ?? ''),
-    stage: String(input.stage ?? ''),
+    stage: isTaskStage(input.stage) ? input.stage : TaskStageEnum.PENDING_DISPATCH,
     createdAt: typeof input.createdAt === 'string' ? input.createdAt : undefined,
     updatedAt: typeof input.updatedAt === 'string' ? input.updatedAt : undefined,
   }

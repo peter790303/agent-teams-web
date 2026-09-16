@@ -10,6 +10,7 @@
   import PixelOfficeMap from '~/layers/office/components/office/PixelOfficeMap.vue'
   import WorkstationRoster from '~/layers/office/components/office/WorkstationRoster.vue'
   import { useOffice } from '~/layers/office/composables/useOffice'
+  import type { ActivityItem, Execution } from '~/layers/office/types'
   import { getRoleStatusInfo } from '~/layers/office/utils/dispatchStatus'
 
   /*********************************************
@@ -34,7 +35,11 @@
   const selectedRoleId = ref<string | null>(null)
   // 時鐘依瀏覽器時區顯示；只在 client mount 後取時間，避免 SSR（容器時區）與 hydration 文字不一致
   const now = ref<Date | null>(null)
-  const selectedRole = computed(() => roles.find((role) => role.id === selectedRoleId.value))
+
+  /*********************************************
+   * 📂 Category: Static Data
+   * 🔧 Defines: 角色說明文字
+   *********************************************/
   const roleDescriptions: Record<string, string> = {
     leader: '協調需求與團隊分工。',
     pm: '整理需求並建立 Spec。',
@@ -50,14 +55,38 @@
    * 🔧 Defines: 定義計算屬性
    *********************************************/
   const systemStatus = computed(() => (error.value ? '連線失敗' : '正常運行中'))
+  const selectedRole = computed(() => roles.find((role) => role.id === selectedRoleId.value))
   const systemStatusClass = computed(() => (error.value ? 'is-unknown' : ''))
   const taskLinks = computed(() => tasks.value.map((task) => ({ ...task, href: `/office/tasks/${task.id}` })))
-  const activities = computed(() =>
+  const activities = computed<ActivityItem[]>(() =>
     taskStates.value
-      .map((state) => state.data.activity)
-      .filter((item): item is string => Boolean(item?.trim()))
-      .slice(0, 5)
+      .flatMap((state) => {
+        const activity: ActivityItem[] = state.data.activity?.trim()
+          ? [{ text: state.data.activity, updatedAt: state.data.updatedAt ?? state.data.task.updatedAt ?? null }]
+          : []
+        const executionItems: ActivityItem[] = state.data.executions.map((execution: Execution) => ({
+          text: `${execution.role ?? '未知'} · ${execution.status ?? '未知'}`,
+          updatedAt: execution.updatedAt ?? execution.createdAt ?? null,
+        }))
+
+        return [...activity, ...executionItems]
+      })
+      .slice(0, 8)
   )
+  const resources = computed(() =>
+    taskStates.value.flatMap((state) => {
+      const entries = state.data.workspace?.resources
+
+      return Array.isArray(entries)
+        ? entries.flatMap((entry) =>
+            typeof entry === 'object' && entry !== null && 'name' in entry
+              ? [{ name: String(entry.name), status: 'status' in entry ? String(entry.status) : undefined }]
+              : []
+          )
+        : []
+    })
+  )
+  const executions = computed<Execution[]>(() => taskStates.value.flatMap((state) => state.data.executions))
   const clockText = computed<string>(() =>
     now.value ? now.value.toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit' }) : '--:--'
   )
@@ -104,8 +133,10 @@
    * 🔧 Defines: Vue 生命週期 hook —— onMounted、onUnmounted 等
    *********************************************/
   let clockTimer: ReturnType<typeof setInterval> | undefined
+  let syncTimer: ReturnType<typeof setInterval> | undefined
   onMounted(() => {
     load()
+    syncTimer = setInterval(() => load(), 10_000)
     now.value = new Date()
     clockTimer = setInterval(() => {
       now.value = new Date()
@@ -113,6 +144,7 @@
   })
   onUnmounted(() => {
     if (clockTimer) clearInterval(clockTimer)
+    if (syncTimer) clearInterval(syncTimer)
   })
 </script>
 <template>
@@ -136,7 +168,12 @@
       <v-row class="workspace" :class="{ 'is-narrow': mdAndDown }">
         <v-col cols="12" md="8"><PixelOfficeMap :role-statuses="roleStatuses" :on-role="openRole" /></v-col>
         <v-col cols="12" md="4"
-          ><CommandCenter :tasks="tasks" :activities="activities" :task-load-status="taskLoadStatus"
+          ><CommandCenter
+            :tasks="tasks"
+            :activities="activities"
+            :resources="resources"
+            :executions="executions"
+            :task-load-status="taskLoadStatus"
         /></v-col>
       </v-row>
       <v-row>
