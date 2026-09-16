@@ -17,16 +17,18 @@
    *********************************************/
   const requiresAccessKey = computed<boolean>(() => !accessKey.value || authError.value !== null)
   const promptText = computed<string>(() => authError.value ?? '請輸入 Nest API access key 以連線。')
+  const isSaveDisabled = computed<boolean>(() => enteredAccessKey.value.trim().length === 0)
 
   /*********************************************
    * 📂 Category: Methods
    * 🔧 Defines: API key 儲存與頁面重新載入
    *********************************************/
-  const saveAccessKey = (): void => {
-    setAccessKey(enteredAccessKey.value)
-  }
   const reloadPage = (): void => {
     if (import.meta.client) window.location.reload()
+  }
+  const saveAccessKey = (): void => {
+    setAccessKey(enteredAccessKey.value)
+    reloadPage()
   }
 </script>
 
@@ -44,7 +46,7 @@
           required
         />
         <div class="d-flex ga-2 mt-3">
-          <v-btn type="submit" color="primary" :disabled="enteredAccessKey.trim().length === 0">儲存並使用</v-btn>
+          <v-btn type="submit" color="primary" :disabled="isSaveDisabled">儲存並使用</v-btn>
           <v-btn v-if="authError" type="button" variant="text" @click="reloadPage">重新載入資料</v-btn>
         </div>
       </v-form>
