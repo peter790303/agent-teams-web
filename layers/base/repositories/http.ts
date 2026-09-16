@@ -29,7 +29,7 @@ export const request = async <T>(path: string, options: Parameters<typeof $fetch
       },
     })
   } catch (reason) {
-    if (getStatusCode(reason) === 401) {
+    if (getStatusCode(reason) === 401 && !isProviderUnauthorized(reason)) {
       markUnauthorized()
       throw new ApiAuthError('unauthorized')
     }
@@ -45,6 +45,21 @@ const getStatusCode = (reason: unknown): number | undefined => {
   const statuses = [reason.statusCode, reason.status, response?.status]
 
   return statuses.find((status): status is number => typeof status === 'number')
+}
+
+const isProviderUnauthorized = (reason: unknown): boolean => {
+  if (!isRecord(reason)) return false
+
+  const response = isRecord(reason.response) ? reason.response : undefined
+  const data = isRecord(reason.data)
+    ? reason.data
+    : response && isRecord(response.data)
+      ? response.data
+      : response && isRecord(response._data)
+        ? response._data
+        : undefined
+
+  return data?.code === 'MODEL_PROVIDER_UNAUTHORIZED'
 }
 
 const isRecord = (value: unknown): value is Record<string, unknown> => typeof value === 'object' && value !== null
