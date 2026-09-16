@@ -52,9 +52,48 @@
   - 修正方向：讓 display 相依 class 在 client 端依實際寬度更新（例如 `createVuetify` 的 `ssr` 設定，或 mount 後才套用 class），修正後需實機確認 1280×800、960–1279 與 390×844，並確認 FrontEnd/12 提到的首次渲染閃動。
 - 🟡 **Console hydration mismatch**：已觀察到 class 不一致，以及 header 時鐘 SSR 文字（伺服端時區 `下午01:42`）與 client（`下午09:42`）不同；時鐘在 `244cd04` 前已存在。確切觸發來源未逐一定位，也未重建舊版確認是否早於本次。FrontEnd/15 要求為 0。
 
+### 上述 🔴／🟡 的修正與複驗（2026-09-16，非完整 QA）
+
+**根因**
+
+- `createVuetify` 未設 `ssr`。Vuetify 的 `getClientWidth(ssr)` 在瀏覽器端且未設 `ssr` 時直接取 `window.innerWidth`，導致 client 首次渲染的 display 值（1280 → `lg`）與 SSR（取不到 viewport，寬度 0 → `xs`）不同，hydration 因此 mismatch，且 class 停在 SSR 的行動版值。
+- 時鐘以 `new Date()` 當 ref 初始值，SSR 在容器時區算出字串、client 以瀏覽器時區算出另一個字串，是第二處 mismatch。
+
+**改檔（2 檔）**
+
+- `layers/base/plugins/vuetify.ts`：`createVuetify` 加 `ssr: true`。SSR 與 client 首次渲染同樣取寬度 0，hydration 先一致；Vuetify 在 `app:suspense:resolve` 呼叫 `display.update()` 取實際寬度，class 隨即修正。未自寫 `@media`，維持 FrontEnd/12「斷點走 `useDisplay()`」。
+- `layers/office/pages/index.vue`：`now` 改為 `ref<Date | null>(null)`，`onMounted` 才賦值；SSR 與 client 首次渲染同為 `--:--`，時間只在 client 計算。
+
+**檢查**
+
+- Prettier `--check`、ESLint（0 error）、`nuxt typecheck`（exit 0）、`git diff --check` 均通過。
+- Docker `compose up -d --build` 重建成功並重啟容器，`/` 與 `/settings/models` 皆 200。
+
+**執行期結果（`ego-browser`，各尺寸皆重新載入後量測）**
+
+| 項目                | 1280×800              | 1100×800                    | 390×844                            |
+| ------------------- | --------------------- | --------------------------- | ---------------------------------- |
+| `office-card` class | `office-card`         | `office-card`               | `office-card is-compact is-mobile` |
+| `roster` class      | `roster`              | `roster is-medium`          | `roster is-medium is-mobile`       |
+| `workspace` class   | `v-row workspace`     | `v-row workspace is-narrow` | `v-row workspace is-narrow`        |
+| 員工列欄數          | 7                     | 4                           | 2                                  |
+| `.map-wrap` padding | 13px                  | 13px                        | 5px                                |
+| 名牌字級            | 7.337px（基礎 clamp） | 7px（clamp 下限）           | 7px（`is-mobile`）                 |
+| 水平溢出            | 無（1265）            | 無（1085）                  | 無（390）                          |
+| Console             | 0                     | 0                           | 0                                  |
+
+- 角色對話框：地圖角色（1280）與員工列（390）皆可開啟「AI 主管 Coordinator」並以「關閉」關閉。僅基本開關，未做完整互動 QA。
+- 時鐘：SSR HTML 為 `☀ --:-- <small></small>`，client 顯示 `☀ 上午09:30 2026/09/16（週三）`，不再有兩邊文字不一致。
+- **首次渲染閃動確實存在且已量到**：員工列欄數在 1280 為 2 → 7（t=16ms → 43ms）、1100 為 2 → 4（t=15ms → 31ms），約一至兩個 frame；390 因 SSR 值已等於實際值而無變化。這是 FrontEnd/12 對 `useDisplay()` SSR 所提醒的行為，目前以「hydration 一致 + mount 後修正」換取 console 0，尚未針對閃動本身做視覺驗收。
+
+**限制**
+
+- 截圖仍失敗：`Page.captureScreenshot` 再次 CDP timeout；依指示只嘗試一次，未重試。**以上全部為 DOM／computed style 量測，不是截圖視覺比對**，不代表視覺與參考一致。
+
 ## 尚須完成
 
-- 修正上方 🔴 Desktop 行動版樣式回歸，並處理 hydration mismatch console error。
+- 首次渲染閃動（桌機與中間寬度會先以行動版樣式繪製約一至兩個 frame）的視覺驗收與是否需進一步處理。
+- 截圖留存：`Page.captureScreenshot` 持續 timeout，視覺比對尚未有圖面證據。
 - 對照原 Nest 版本及需求圖片（像素辦公室地圖、精簡名牌與清楚狀態、右側 Command Center），驗收整體視覺與人物、狀態呈現；本包不代表完整視覺一致。
 - 窄版／行動版：390×844 已做上述定向檢查；960–1279 等中間寬度、有資料狀態下的名牌與狀態呈現、截圖留存仍待完成。
 - API 失敗情境的執行期驗證；本包已完成程式層面的載入、空資料與錯誤狀態檢查。

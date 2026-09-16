@@ -12,6 +12,8 @@ import 'vuetify/styles'
  *********************************************/
 export default defineNuxtPlugin((nuxtApp) => {
   const vuetify = createVuetify({
+    // SSR 取不到 viewport 寬度：hydration 先沿用伺服端 display 值，app:suspense:resolve 後才更新為實際寬度，避免 class 不一致
+    ssr: true,
     theme: {
       defaultTheme: 'pixelOffice',
       themes: {

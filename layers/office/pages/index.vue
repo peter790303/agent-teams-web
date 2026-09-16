@@ -32,6 +32,8 @@
   const purpose = ref<string>('')
   const projectId = ref<string>('default')
   const selectedRoleId = ref<string | null>(null)
+  // 時鐘依瀏覽器時區顯示；只在 client mount 後取時間，避免 SSR（容器時區）與 hydration 文字不一致
+  const now = ref<Date | null>(null)
   const selectedRole = computed(() => roles.find((role) => role.id === selectedRoleId.value))
   const roleDescriptions: Record<string, string> = {
     leader: '協調需求與團隊分工。',
@@ -56,10 +58,13 @@
       .filter((item): item is string => Boolean(item?.trim()))
       .slice(0, 5)
   )
-  const now = ref(new Date())
-  const clockText = computed(() => now.value.toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit' }))
-  const dateText = computed(() =>
-    now.value.toLocaleDateString('zh-TW', { year: 'numeric', month: '2-digit', day: '2-digit', weekday: 'short' })
+  const clockText = computed<string>(() =>
+    now.value ? now.value.toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit' }) : '--:--'
+  )
+  const dateText = computed<string>(() =>
+    now.value
+      ? now.value.toLocaleDateString('zh-TW', { year: 'numeric', month: '2-digit', day: '2-digit', weekday: 'short' })
+      : ''
   )
 
   /*********************************************
@@ -101,6 +106,7 @@
   let clockTimer: ReturnType<typeof setInterval> | undefined
   onMounted(() => {
     load()
+    now.value = new Date()
     clockTimer = setInterval(() => {
       now.value = new Date()
     }, 60_000)
