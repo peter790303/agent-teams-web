@@ -1,6 +1,6 @@
 # Office 待驗收追蹤
 
-所有程式修改已提交至 feature 分支 `codex/office-visual-rebuild`，本機 `master` 已 fast-forward 整合至 `244cd04`（無 remote，未 push）。以下 PASS 僅適用列明範圍，不代表整體 UI 或 Nuxt 移植正式驗收通過。
+所有程式修改已提交至 feature 分支 `codex/office-visual-rebuild`，本機 `master` 已 fast-forward 與該分支同步（無 remote，未 push）。以下 PASS 僅適用列明範圍，不代表整體 UI 或 Nuxt 移植正式驗收通過。
 
 ## 已有正式結果
 
