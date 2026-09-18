@@ -7,7 +7,7 @@ export default defineNuxtConfig({
   modules: ['@nuxt/eslint'],
   devtools: { enabled: false },
   plugins: ['./layers/base/plugins/vuetify.ts'],
-  css: ['~/assets/css/main.css'],
+  css: ['@mdi/font/css/materialdesignicons.css', '~/assets/css/main.css'],
   runtimeConfig: {
     public: {
       apiBase: process.env.NUXT_PUBLIC_API_BASE || 'http://localhost:30678',

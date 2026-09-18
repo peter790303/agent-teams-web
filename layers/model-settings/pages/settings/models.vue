@@ -4,7 +4,7 @@
    * 🔧 Defines: 引入必要的模組和庫
    *********************************************/
   import { useModelSettings } from '~/layers/model-settings/composables/useModelSettings'
-  import type { Capacity, HealthEntry, ModelCatalog } from '~/layers/model-settings/types'
+  import type { Capacity, HealthEntry, ModelCatalog, PolicyEditor, Role } from '~/layers/model-settings/types'
 
   /*********************************************
    * 📂 Category: Page Meta  (Nuxt only)
@@ -26,46 +26,77 @@
     estimatedReasonText: string | null
     observedAtText: string
   }
+  interface CatalogSelectItem {
+    type?: 'subheader'
+    title: string
+    value?: string
+    props?: {
+      color?: string
+    }
+  }
+  interface PolicyEditorCard {
+    editor: PolicyEditor
+    roleLabel: string
+    canSave: boolean
+    selectDisabled: boolean
+  }
 
   /*********************************************
-   * 📂 Category: Methods
-   * 🔧 Defines: 模型顯示文字與表單事件
+   * 📂 Category: Static Data
+   * 🔧 Defines: 角色顯示名稱
    *********************************************/
-  const candidateLabel = (candidate: { providerId: string; modelId: string }): string =>
-    `${candidate.providerId}/${candidate.modelId}`
+  const ROLE_LABELS: Record<Role, string> = {
+    leader: 'Leader',
+    pm: 'PM',
+    rd_leader: 'RD Leader',
+    rd: 'RD',
+    qa: 'QA',
+  }
+  const PROVIDER_LABELS: Record<string, string> = {
+    anthropic: 'Anthropic',
+    openai: 'OpenAI',
+    agy: 'agy',
+    xai: 'xAI',
+  }
 
   /*********************************************
    * 📂 Category: Composables / Plugins
    * 🔧 Defines: 自定 composables、Pinia 狀態、i18n、plugin 等注入來源
    *********************************************/
 
-  const {
-    editors,
-    capacities,
-    health,
-    catalog,
-    catalogState,
-    catalogError,
-    message,
-    error,
-    load,
-    addCandidate,
-    selectCatalogModel,
-    toggle,
-    save,
-    id,
-    catalogId,
-  } = useModelSettings()
+  const { editors, capacities, health, catalog, catalogState, catalogError, message, error, load, save, catalogId } =
+    useModelSettings()
 
   /*********************************************
    * 📂 Category: Computed
    * 🔧 Defines: 定義計算屬性
    *********************************************/
-  const catalogItems = computed(() =>
-    catalog.value.map((candidate: ModelCatalog) => ({
-      ...candidate,
-      key: catalogId(candidate),
-      label: candidateLabel(candidate),
+  const isCatalogLoading = computed(() => catalogState.value === 'pending')
+  const isCatalogReady = computed(() => catalogState.value === 'loaded' && catalog.value.length > 0)
+  const showEmptyCatalog = computed(() => catalogState.value === 'loaded' && catalog.value.length === 0)
+  const catalogSelectItems = computed<CatalogSelectItem[]>(() => {
+    const providerIds = [...new Set(catalog.value.map((entry: ModelCatalog) => entry.providerId))]
+
+    return providerIds.flatMap((providerId) => [
+      {
+        type: 'subheader',
+        title: PROVIDER_LABELS[providerId] ?? providerId,
+        props: { color: 'accent' },
+      },
+      ...catalog.value
+        .filter((entry: ModelCatalog) => entry.providerId === providerId)
+        .map((entry: ModelCatalog) => ({
+          title: entry.modelId,
+          value: catalogId(entry),
+        })),
+    ])
+  })
+  const editorCards = computed<PolicyEditorCard[]>(() =>
+    editors.value.map((editor) => ({
+      editor,
+      roleLabel: ROLE_LABELS[editor.role],
+      canSave: (editor.loadState === 'loaded' || editor.loadState === 'missing') && isCatalogReady.value,
+      selectDisabled: !isCatalogReady.value || editor.loadState === 'failed' || editor.loadState === 'pending',
     }))
   )
   const capacityRows = computed<CapacityRow[]>(() =>
@@ -95,72 +126,41 @@
     <main class="panel-page">
       <NuxtLink to="/">← 返回 AI Office</NuxtLink>
       <h1>模型設定與監控</h1>
-      <p>管理角色白名單、候選模型能力、評分、容量與 Provider 健康狀態。</p>
+      <p>為每個角色複選可用模型。能力、品質、成本與延遲由系統設定，不需填寫。</p>
+      <p v-if="message" role="status">{{ message }}</p>
+      <p v-if="error" role="alert">{{ error }}</p>
+      <p v-if="catalogError" role="alert">{{ catalogError }}</p>
+      <p v-else-if="showEmptyCatalog">目前沒有可選模型</p>
       <v-row>
-        <v-col v-for="editor in editors" :key="editor.role" cols="12" md="6">
-          <p v-if="message" role="status">{{ message }}</p>
-          <p v-if="error" role="alert">{{ error }}</p>
+        <v-col v-for="card in editorCards" :key="card.editor.role" cols="12" md="6">
           <section class="policy">
-            <h2>{{ editor.role }}</h2>
-            <p v-if="editor.loadError">{{ editor.loadError }}</p>
-            <p v-if="editor.validationError" role="alert">{{ editor.validationError }}</p>
-            <v-text-field
-              v-model="editor.minQualityScore"
-              label="最低品質分數"
-              type="number"
-              min="0"
-              :disabled="editor.loadState === 'failed' || editor.loadState === 'pending'"
+            <h2>{{ card.roleLabel }}</h2>
+            <p v-if="card.editor.loadError">{{ card.editor.loadError }}</p>
+            <p v-if="card.editor.validationError" role="alert">{{ card.editor.validationError }}</p>
+            <v-select
+              v-model="card.editor.selectedIds"
+              :items="catalogSelectItems"
+              item-title="title"
+              item-value="value"
+              label="可用模型"
+              hint="只需選擇此角色能使用的模型"
+              prepend-inner-icon="mdi-chip"
+              persistent-hint
+              multiple
+              chips
+              closable-chips
+              :loading="isCatalogLoading"
+              :disabled="card.selectDisabled"
             />
-            <v-list>
-              <li v-for="candidate in editor.candidates" :key="id(candidate)">
-                <v-checkbox
-                  :model-value="editor.selectedIds.includes(id(candidate))"
-                  :label="candidateLabel(candidate)"
-                  @update:model-value="toggle(editor, candidate)"
-                />
-                <v-text-field v-model="editor.candidateDrafts[id(candidate)].capabilities" label="能力" />
-                <v-text-field v-model="editor.candidateDrafts[id(candidate)].qualityScore" label="品質" type="number" />
-                <v-text-field v-model="editor.candidateDrafts[id(candidate)].costScore" label="成本" type="number" />
-                <v-text-field v-model="editor.candidateDrafts[id(candidate)].latencyScore" label="延遲" type="number" />
-              </li>
-            </v-list>
-            <v-form @submit.prevent="addCandidate(editor)">
-              <v-select
-                :model-value="catalogId(editor.draft)"
-                label="Provider 支援模型"
-                :items="catalogItems"
-                item-title="label"
-                item-value="key"
-                :loading="catalogState === 'pending'"
-                :disabled="catalogState !== 'loaded' || catalog.length === 0"
-                @update:model-value="selectCatalogModel(editor, $event)"
-              />
-              <v-text-field v-model="editor.draft.providerId" label="Provider" readonly />
-              <v-text-field v-model="editor.draft.capabilities" label="能力（逗號分隔）" />
-              <v-text-field v-model="editor.draft.qualityScore" label="品質分數" type="number" />
-              <v-text-field v-model="editor.draft.costScore" label="成本分數" type="number" />
-              <v-text-field v-model="editor.draft.latencyScore" label="延遲分數" type="number" />
-              <v-btn
-                type="submit"
-                class="mt-3"
-                :disabled="editor.loadState === 'failed' || editor.loadState === 'pending' || catalogState !== 'loaded'"
-                >新增候選</v-btn
-              >
-            </v-form>
-            <p v-if="catalogError" role="alert">{{ catalogError }}</p>
-            <p v-else-if="catalogState === 'loaded' && catalog.length === 0">Provider 尚未回傳可用模型</p>
-            <v-btn
-              class="mt-3"
-              :disabled="editor.loadState !== 'loaded' && editor.loadState !== 'missing'"
-              @click="save(editor)"
+            <v-btn class="mt-3" prepend-icon="mdi-content-save" :disabled="!card.canSave" @click="save(card.editor)"
               >儲存</v-btn
             >
           </section>
         </v-col>
       </v-row>
       <v-row>
-        <v-col cols="12" md="6"
-          ><section>
+        <v-col cols="12" md="6">
+          <section>
             <h2>角色容量</h2>
             <v-table>
               <tbody>
@@ -171,10 +171,10 @@
                 </tr>
               </tbody>
             </v-table>
-          </section></v-col
-        >
-        <v-col cols="12"
-          ><section class="health">
+          </section>
+        </v-col>
+        <v-col cols="12">
+          <section class="health">
             <h2>Provider 健康</h2>
             <v-table>
               <tbody>
@@ -190,8 +190,8 @@
                 </tr>
               </tbody>
             </v-table>
-          </section></v-col
-        >
+          </section>
+        </v-col>
       </v-row>
     </main>
   </BasePageLayout>

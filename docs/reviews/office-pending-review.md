@@ -39,7 +39,11 @@
 | Console（Office 頁） | 1 則 error：`Hydration completed but contains mismatches.`                    | 同左                                                                                        |
 | 截圖                 | 未取得：`Page.captureScreenshot` 逾時（含 raw CDP、有／無 override，共 6 次） | 同左                                                                                        |
 
-- 模型頁目前資料狀態：`/model-policies/catalog` 回 400，各卡顯示「目前無法取得 Provider 支援模型，請稍後重試」；pm、rd_leader、rd、qa 政策回 404，顯示「尚未建立政策」。這些是後端資料狀態，未判定為前端回歸。
+- 模型頁當時資料狀態：`/model-policies/catalog` 回 400，各卡顯示「目前無法取得 Provider 支援模型，請稍後重試」；pm、rd_leader、rd、qa 政策回 404，顯示「尚未建立政策」。這些是後端資料狀態，未判定為前端回歸。
+
+### 後續（2026-09-18）
+
+catalog 已改由 Nest `config/LLM/` 提供，`GET /model-policies/catalog` 為 200，設定頁改為依廠家複選白名單。未儲存角色的政策 404 仍表示尚未建立政策。本段不改寫上方當時驗收結果。
 - 角色狀態目前皆為「資料未提供」（無任務資料），無法用本次畫面驗收「狀態清楚」。
 
 ### 發現的回歸（待修正，本任務未改碼）

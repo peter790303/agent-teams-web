@@ -2,7 +2,9 @@
  * 📂 Category: Imports
  * 🔧 Defines: 引入必要的模組和庫
  *********************************************/
+import '@mdi/font/css/materialdesignicons.css'
 import { createVuetify } from 'vuetify'
+import { aliases, mdi } from 'vuetify/iconsets/mdi'
 
 import 'vuetify/styles'
 
@@ -14,14 +16,39 @@ export default defineNuxtPlugin((nuxtApp) => {
   const vuetify = createVuetify({
     // SSR 取不到 viewport 寬度：hydration 先沿用伺服端 display 值，app:suspense:resolve 後才更新為實際寬度，避免 class 不一致
     ssr: true,
+    icons: {
+      defaultSet: 'mdi',
+      aliases,
+      sets: { mdi },
+    },
+    defaults: {
+      VSelect: {
+        variant: 'outlined',
+        color: 'accent',
+        menuIcon: 'mdi-chevron-down',
+      },
+      VBtn: {
+        color: 'accent',
+        variant: 'flat',
+      },
+      VChip: {
+        color: 'primary',
+        variant: 'flat',
+      },
+    },
     theme: {
       defaultTheme: 'pixelOffice',
       themes: {
         pixelOffice: {
           dark: true,
           colors: {
-            appBackground: '#10141d',
+            background: '#10141d',
             surface: '#1b212c',
+            primary: '#5cae88',
+            'on-background': '#e8edf5',
+            'on-surface': '#e8edf5',
+            'on-primary': '#102018',
+            appBackground: '#10141d',
             surfaceAlt: '#222c39',
             border: '#384453',
             text: '#e8edf5',

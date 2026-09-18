@@ -59,7 +59,20 @@ const toHealth = (response: HealthResource): HealthEntry[] =>
 const toCatalog = (response: ModelCatalogResource): ModelCatalog[] =>
   (response.data ?? []).flatMap((entry) =>
     typeof entry.providerId === 'string' && typeof entry.modelId === 'string'
-      ? [{ providerId: entry.providerId, modelId: entry.modelId }]
+      ? [
+          {
+            providerId: entry.providerId,
+            modelId: entry.modelId,
+            capabilities: Array.isArray(entry.capabilities)
+              ? entry.capabilities.filter(
+                  (value): value is string => typeof value === 'string' && value.trim().length > 0
+                )
+              : [],
+            qualityScore: asNumber(entry.qualityScore),
+            costScore: asNumber(entry.costScore),
+            latencyScore: asNumber(entry.latencyScore),
+          },
+        ]
       : []
   )
 

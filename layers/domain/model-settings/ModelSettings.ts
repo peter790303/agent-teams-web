@@ -50,4 +50,8 @@ export interface Capacity {
 export interface ModelCatalog {
   providerId: string
   modelId: string
+  capabilities: string[]
+  qualityScore: number
+  costScore: number
+  latencyScore: number
 }

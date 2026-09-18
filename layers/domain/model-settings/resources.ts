@@ -13,5 +13,12 @@ export interface CapacityResource {
   data?: unknown[]
 }
 export interface ModelCatalogResource {
-  data?: Array<{ providerId?: unknown; modelId?: unknown }>
+  data?: Array<{
+    providerId?: unknown
+    modelId?: unknown
+    capabilities?: unknown
+    qualityScore?: unknown
+    costScore?: unknown
+    latencyScore?: unknown
+  }>
 }
