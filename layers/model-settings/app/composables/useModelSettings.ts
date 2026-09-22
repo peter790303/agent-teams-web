@@ -52,7 +52,7 @@ export const useModelSettings = (): ModelSettingsComposable => {
       role,
       selectedIds: [],
       loadState: 'pending',
-    }))
+    })),
   )
   const capacities = ref<Capacity[]>([])
   const health = ref<HealthEntry[]>([])
@@ -82,7 +82,7 @@ export const useModelSettings = (): ModelSettingsComposable => {
         } catch {
           return { status: 'rejected' as const }
         }
-      })
+      }),
     )
     const [policies, catalogResult, capacityResult, healthResult] = await Promise.allSettled([
       policiesPromise,

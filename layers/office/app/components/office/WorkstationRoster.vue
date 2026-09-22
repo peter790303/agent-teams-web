@@ -37,7 +37,7 @@
       ...person,
       ...getRoleStatusInfo(props.roleStatuses[person.id]),
       avatarSvg: avatar(person.color, person.id === 'pm' || person.id === 'qa' ? '#624633' : '#383630'),
-    }))
+    })),
   )
 
   /*********************************************

@@ -81,12 +81,12 @@
     running: props.tasks.filter(
       (task) =>
         ![TaskStageEnum.COMPLETED, TaskStageEnum.CANCELLED, TaskStageEnum.PENDING_DISPATCH].includes(
-          task.stage as TaskStageEnum
-        )
+          task.stage as TaskStageEnum,
+        ),
     ).length,
   }))
   const pendingTasks = computed<Task[]>(() =>
-    props.tasks.filter((task) => task.stage === TaskStageEnum.PENDING_DISPATCH)
+    props.tasks.filter((task) => task.stage === TaskStageEnum.PENDING_DISPATCH),
   )
   const feed = computed<ActivityPresentation[]>(() => {
     const source = props.activities.length
@@ -118,7 +118,7 @@
         ariaLabel: `${resource.name} 資源狀態：${value}`,
         ariaValueText: value,
       }
-    })
+    }),
   )
   const pendingTaskLinks = computed<TaskPresentation[]>(() =>
     pendingTasks.value.map((task: Task) => ({
@@ -127,7 +127,7 @@
       project: '',
       stage: stageLabel(task.stage),
       href: `/office/tasks/${task.id}`,
-    }))
+    })),
   )
   const taskLinks = computed<TaskPresentation[]>(() =>
     props.tasks.map((task: Task) => ({
@@ -136,7 +136,7 @@
       project: task.projectId,
       stage: stageLabel(task.stage),
       href: `/office/tasks/${task.id}`,
-    }))
+    })),
   )
   const showEmptyFeed = computed<boolean>(() => feed.value.length === 0)
   const showEmptyPendingTasks = computed<boolean>(() => pendingTaskLinks.value.length === 0)

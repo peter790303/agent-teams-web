@@ -37,7 +37,7 @@
       ariaLabel: `查看${person.name}`,
       hairColor: person.id === 'pm' || person.id === 'qa' ? '#624633' : '#383630',
       ...getRoleStatusInfo(props.roleStatuses[person.id]),
-    }))
+    })),
   )
 
   /*********************************************

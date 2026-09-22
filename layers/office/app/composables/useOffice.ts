@@ -101,10 +101,10 @@ export const useOffice = (): OfficeComposable => {
         ? [result.reason instanceof Error ? result.reason.message : '載入任務狀態失敗']
         : result.value.error
           ? [result.value.error]
-          : []
+          : [],
     )
     taskStates.value = states.flatMap((result) =>
-      result.status === 'fulfilled' && result.value.data ? [result.value.data] : []
+      result.status === 'fulfilled' && result.value.data ? [result.value.data] : [],
     )
     setError(stateErrors.length > 0 ? stateErrors.join('；') : null)
   }

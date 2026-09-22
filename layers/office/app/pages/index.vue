@@ -83,7 +83,7 @@
 
         return [...activity, ...executionItems]
       })
-      .slice(0, 8)
+      .slice(0, 8),
   )
   const resources = computed(() =>
     taskStates.value.flatMap((state) => {
@@ -93,18 +93,18 @@
         ? entries.flatMap((entry) =>
             typeof entry === 'object' && entry !== null && 'name' in entry
               ? [{ name: String(entry.name), status: 'status' in entry ? String(entry.status) : undefined }]
-              : []
+              : [],
           )
         : []
-    })
+    }),
   )
   const clockText = computed<string>(() =>
-    now.value ? now.value.toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit' }) : '--:--'
+    now.value ? now.value.toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit' }) : '--:--',
   )
   const dateText = computed<string>(() =>
     now.value
       ? now.value.toLocaleDateString('zh-TW', { year: 'numeric', month: '2-digit', day: '2-digit', weekday: 'short' })
-      : ''
+      : '',
   )
 
   /*********************************************
@@ -136,7 +136,7 @@
   const roleTaskText = computed(() =>
     tasks.value.length
       ? `目前共有 ${tasks.value.length} 筆任務，角色狀態：${roleState.value}。`
-      : '尚未選取任務，角色狀態資料未提供。'
+      : '尚未選取任務，角色狀態資料未提供。',
   )
 
   /*********************************************

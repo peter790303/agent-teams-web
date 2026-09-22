@@ -106,13 +106,13 @@
    * 🔧 Defines: 定義計算屬性
    *********************************************/
   const interventionData = computed<InterventionView | null>(() =>
-    intervention.value?.data === null || intervention.value?.data === undefined ? null : intervention.value.data
+    intervention.value?.data === null || intervention.value?.data === undefined ? null : intervention.value.data,
   )
   const interventionEditable = computed<boolean>(() => interventionData.value?.editable === true)
   const qaRows = computed<Array<{ label: string; value: string }>>(() =>
     state.value?.data.qaReport === null || state.value?.data.qaReport === undefined
       ? []
-      : Object.entries(state.value.data.qaReport).map(([label, value]) => ({ label, value: readableValue(value) }))
+      : Object.entries(state.value.data.qaReport).map(([label, value]) => ({ label, value: readableValue(value) })),
   )
   const hasQaRows = computed<boolean>(() => qaRows.value.length > 0)
   const submitDisabled = computed<boolean>(() => !interventionEditable.value || gate.value === '')
@@ -131,15 +131,15 @@
   const deliveryCleanup = computed<string>(() => (state.value?.data.delivery?.cleanup as string) ?? '未知')
 
   const diagnostics = computed<unknown>(
-    () => interventionData.value?.diagnostics ?? interventionData.value?.evidence ?? null
+    () => interventionData.value?.diagnostics ?? interventionData.value?.evidence ?? null,
   )
   const displayWorktree = computed<string>(() => interventionData.value?.worktree ?? (worktree.value || '未知'))
   const diagnosticsText = computed(() => readableValue(diagnostics.value))
   const dispatchLines = computed<string[]>(
-    () => state.value?.data.dispatches.map((dispatch: DispatchView) => `${dispatch.role} · ${dispatch.status}`) ?? []
+    () => state.value?.data.dispatches.map((dispatch: DispatchView) => `${dispatch.role} · ${dispatch.status}`) ?? [],
   )
   const blockers = computed<string[]>(
-    () => state.value?.data.dispatches.flatMap((dispatch: DispatchView) => dispatch.blockedReasons) ?? []
+    () => state.value?.data.dispatches.flatMap((dispatch: DispatchView) => dispatch.blockedReasons) ?? [],
   )
   const summary = computed<string[]>(() =>
     state.value === null
@@ -149,7 +149,7 @@
           `Plan：${state.value.data.plan ? '已載入' : '尚未建立'}`,
           `Evidence：${state.value.data.executions.length} 筆`,
           `Environment：${state.value.data.workspace ? '已配置' : '尚未配置'}`,
-        ]
+        ],
   )
 
   /*********************************************

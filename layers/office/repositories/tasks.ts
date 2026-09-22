@@ -62,16 +62,16 @@ const result = async <T>(operation: Promise<T>): Promise<RepositoryResult<T>> =>
 export const listTasks = (): Promise<RepositoryResult<Task[]>> =>
   result(
     request<TaskListResource>('/tasks').then((response) =>
-      (response.data ?? []).map((task) => toTask(task as Record<string, unknown>))
-    )
+      (response.data ?? []).map((task) => toTask(task as Record<string, unknown>)),
+    ),
   )
 export const createTask = ({ purpose, projectId }: CreateTaskInput): Promise<RepositoryResult<Task>> => {
   const payload: CreateTaskPayload = { purpose, projectId }
 
   return result(
     request<TaskResource>('/tasks', { method: 'POST', body: payload }).then((response) =>
-      toTask((response.data ?? {}) as Record<string, unknown>)
-    )
+      toTask((response.data ?? {}) as Record<string, unknown>),
+    ),
   )
 }
 export const getTaskState = ({ id }: TaskIdInput): Promise<RepositoryResult<TaskState>> =>
@@ -79,8 +79,8 @@ export const getTaskState = ({ id }: TaskIdInput): Promise<RepositoryResult<Task
 export const getIntervention = ({ id }: TaskIdInput): Promise<RepositoryResult<Intervention | null>> =>
   result(
     request<unknown>(`/tasks/${encodeURIComponent(id)}/intervention`).then((response) =>
-      toIntervention((response as { data?: unknown }).data)
-    )
+      toIntervention((response as { data?: unknown }).data),
+    ),
   )
 export const resumeTask = ({
   id,
@@ -95,7 +95,7 @@ export const resumeTask = ({
     request<unknown>(`/tasks/${encodeURIComponent(id)}/intervention/resume`, {
       method: 'POST',
       body: payload,
-    }).then((response) => toTaskAction(response))
+    }).then((response) => toTaskAction(response)),
   )
 }
 export const submitTask = ({
@@ -112,6 +112,6 @@ export const submitTask = ({
       method: 'POST',
       headers: { 'Idempotency-Key': idempotencyKey },
       body: payload,
-    }).then((response) => toTaskAction(response))
+    }).then((response) => toTaskAction(response)),
   )
 }

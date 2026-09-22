@@ -7,7 +7,7 @@
     defineProps<{
       maxWidth?: string | number
     }>(),
-    { maxWidth: 1380 }
+    { maxWidth: 1380 },
   )
 </script>
 

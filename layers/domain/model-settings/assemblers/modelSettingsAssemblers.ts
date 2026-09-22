@@ -65,7 +65,7 @@ const toCatalog = (response: ModelCatalogResource): ModelCatalog[] =>
             modelId: entry.modelId,
             capabilities: Array.isArray(entry.capabilities)
               ? entry.capabilities.filter(
-                  (value): value is string => typeof value === 'string' && value.trim().length > 0
+                  (value): value is string => typeof value === 'string' && value.trim().length > 0,
                 )
               : [],
             qualityScore: asNumber(entry.qualityScore),
@@ -73,7 +73,7 @@ const toCatalog = (response: ModelCatalogResource): ModelCatalog[] =>
             latencyScore: asNumber(entry.latencyScore),
           },
         ]
-      : []
+      : [],
   )
 
 const toCapacity = (response: CapacityResource): Capacity[] =>

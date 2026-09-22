@@ -97,13 +97,13 @@
       roleLabel: ROLE_LABELS[editor.role],
       canSave: (editor.loadState === 'loaded' || editor.loadState === 'missing') && isCatalogReady.value,
       selectDisabled: !isCatalogReady.value || editor.loadState === 'failed' || editor.loadState === 'pending',
-    }))
+    })),
   )
   const capacityRows = computed<CapacityRow[]>(() =>
     capacities.value.map((capacity: Capacity) => ({
       ...capacity,
       capacityText: `${capacity.currentCapacity}/${capacity.maxCapacity}`,
-    }))
+    })),
   )
   const healthRows = computed<HealthRow[]>(() =>
     health.value.map((entry: HealthEntry) => ({
@@ -112,7 +112,7 @@
       quotaText: `${entry.quota.status} ${entry.quota.amount ?? '—'} ${entry.quota.unit ?? ''}`.trim(),
       estimatedReasonText: entry.quota.isEstimated ? entry.quota.estimatedReason : '',
       observedAtText: `${entry.isStale ? '過期' : '新鮮'} · ${entry.observedAt}`,
-    }))
+    })),
   )
 
   /*********************************************
