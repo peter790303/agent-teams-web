@@ -5,3 +5,16 @@ node_modules/
 .env.*
 !.env.example
 dist/
+
+# Local agent state and scratch work
+.claude-flow/
+.claude/
+.scratch/
+.swarm/
+ruvector.db
+ruvector.db-*
+
+# Local OS files and test output
+.DS_Store
+coverage/
+*.log

@@ -2,8 +2,8 @@
  * 📂 Category: Imports
  * 🔧 Defines: 引入必要的模組和庫
  *********************************************/
-import { DispatchStatusEnum } from '~/layers/domain/task/enums/DispatchStatusEnum'
-import type { DispatchStatus } from '~/layers/domain/task/types/DispatchStatus'
+import { DispatchStatusEnum } from '~~/layers/domain/task/enums/DispatchStatusEnum'
+import type { DispatchStatus } from '~~/layers/domain/task/types/DispatchStatus'
 
 /*********************************************
  * 📂 Category: Interface

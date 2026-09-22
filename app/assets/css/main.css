@@ -517,6 +517,7 @@ h1 small {
 .panel-page {
   max-width: 1100px;
   margin: 35px auto;
+  overflow-wrap: anywhere;
 }
 .purpose {
   font-size: 22px;
@@ -545,8 +546,13 @@ th {
 }
 .detail-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 14px;
+}
+@media (max-width: 700px) {
+  .detail-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }
 .command-center {
   background: rgb(var(--v-theme-surface));

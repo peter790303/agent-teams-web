@@ -1,5 +1,7 @@
 .scratch/
 .claude-flow/
+.claude/
+.swarm/
 node_modules/
 .nuxt/
 .output/

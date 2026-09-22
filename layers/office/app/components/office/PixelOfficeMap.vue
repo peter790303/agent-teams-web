@@ -6,9 +6,9 @@
   import { computed } from 'vue'
   import { useDisplay } from 'vuetify'
 
-  import type { DispatchStatus } from '~/layers/domain/task/types/DispatchStatus'
-  import { avatar, roles, room } from '~/layers/office/assets/originalOffice'
-  import { getRoleStatusInfo } from '~/layers/office/utils/dispatchStatus'
+  import type { DispatchStatus } from '~~/layers/domain/task/types/DispatchStatus'
+  import { avatar, roles, room } from '~~/layers/office/app/assets/originalOffice'
+  import { getRoleStatusInfo } from '~~/layers/office/utils/dispatchStatus'
 
   /*********************************************
    * 📂 Category: Props / Emits

@@ -20,6 +20,10 @@ export default withNuxt([
               pattern: '~/**',
               group: 'internal',
             },
+            {
+              pattern: '~~/**',
+              group: 'internal',
+            },
           ],
           pathGroupsExcludedImportTypes: ['builtin'],
           'newlines-between': 'always',

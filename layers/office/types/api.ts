@@ -4,18 +4,18 @@
  *********************************************/
 import type { ComputedRef, Ref } from 'vue'
 
-import type { Task } from '~/layers/domain/task/Task'
-import type { Intervention, TaskState } from '~/layers/domain/task/TaskState'
-import type { DispatchStatus } from '~/layers/domain/task/types/DispatchStatus'
+import type { Task } from '~~/layers/domain/task/Task'
+import type { Intervention, TaskState } from '~~/layers/domain/task/TaskState'
+import type { DispatchStatus } from '~~/layers/domain/task/types/DispatchStatus'
 
 /*********************************************
  * 📂 Category: Interface
  * 🔧 Defines: 定義元件內使用的自訂 TypeScript 型別
  *********************************************/
-export type { Role } from '~/layers/domain/types'
-export type { Task } from '~/layers/domain/task/Task'
-export type { Dispatch, Execution, Intervention, TaskState, TaskStateData } from '~/layers/domain/task/TaskState'
-export type { TaskAction as TaskActionResource } from '~/layers/domain/task/TaskState'
+export type { Role } from '~~/layers/domain/types'
+export type { Task } from '~~/layers/domain/task/Task'
+export type { Dispatch, Execution, Intervention, TaskState, TaskStateData } from '~~/layers/domain/task/TaskState'
+export type { TaskAction as TaskActionResource } from '~~/layers/domain/task/TaskState'
 export interface TaskListResource {
   data?: unknown[]
 }

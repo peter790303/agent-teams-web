@@ -3,8 +3,8 @@
    * 📂 Category: Imports
    * 🔧 Defines: 引入必要的模組和庫
    *********************************************/
-  import { useModelSettings } from '~/layers/model-settings/composables/useModelSettings'
-  import type { Capacity, HealthEntry, ModelCatalog, PolicyEditor, Role } from '~/layers/model-settings/types'
+  import { useModelSettings } from '~~/layers/model-settings/app/composables/useModelSettings'
+  import type { Capacity, HealthEntry, ModelCatalog, PolicyEditor, Role } from '~~/layers/model-settings/types'
 
   /*********************************************
    * 📂 Category: Page Meta  (Nuxt only)

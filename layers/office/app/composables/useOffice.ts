@@ -2,9 +2,9 @@
  * 📂 Category: Imports
  * 🔧 Defines: 引入必要的模組和庫
  *********************************************/
-import { DispatchStatusEnum } from '~/layers/domain/task/enums/DispatchStatusEnum'
-import { isTaskStage, TaskStageEnum } from '~/layers/domain/task/enums/TaskStageEnum'
-import type { DispatchStatus } from '~/layers/domain/task/types/DispatchStatus'
+import { DispatchStatusEnum } from '~~/layers/domain/task/enums/DispatchStatusEnum'
+import { isTaskStage, TaskStageEnum } from '~~/layers/domain/task/enums/TaskStageEnum'
+import type { DispatchStatus } from '~~/layers/domain/task/types/DispatchStatus'
 import {
   createTask,
   getIntervention,
@@ -12,8 +12,8 @@ import {
   listTasks,
   resumeTask,
   submitTask,
-} from '~/layers/office/repositories'
-import { OfficeLoadStatusEnum } from '~/layers/office/types'
+} from '~~/layers/office/repositories'
+import { OfficeLoadStatusEnum } from '~~/layers/office/types'
 import type {
   Intervention,
   OfficeComposable,
@@ -21,7 +21,7 @@ import type {
   SubmitTaskCommand,
   Task,
   TaskState,
-} from '~/layers/office/types'
+} from '~~/layers/office/types'
 
 export const useOffice = (): OfficeComposable => {
   /*********************************************

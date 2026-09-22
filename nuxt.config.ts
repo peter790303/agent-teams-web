@@ -1,12 +1,9 @@
-/*********************************************
- * 📂 Category: Methods
- * 🔧 Defines: Nuxt 應用程式設定
- *********************************************/
+// Category: Methods
+// Defines: Nuxt 應用程式設定
 export default defineNuxtConfig({
   extends: ['./layers/base', './layers/domain', './layers/office', './layers/model-settings'],
   modules: ['@nuxt/eslint'],
   devtools: { enabled: false },
-  plugins: ['./layers/base/plugins/vuetify.ts'],
   css: ['@mdi/font/css/materialdesignicons.css', '~/assets/css/main.css'],
   runtimeConfig: {
     public: {

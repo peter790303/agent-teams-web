@@ -5,7 +5,7 @@
  * 📂 Category: Interface
  * 🔧 Defines: 定義任務資源型別
  *********************************************/
-import type { TaskStageEnum } from '~/layers/domain/task/enums/TaskStageEnum'
+import type { TaskStageEnum } from '~~/layers/domain/task/enums/TaskStageEnum'
 
 export type TaskStage = TaskStageEnum | 'unknown'
 

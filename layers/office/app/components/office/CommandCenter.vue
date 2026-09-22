@@ -3,8 +3,8 @@
    * 📂 Category: Imports
    * 🔧 Defines: 引入任務型別
    *********************************************/
-  import { TaskStageEnum } from '~/layers/domain/task/enums/TaskStageEnum'
-  import type { Task } from '~/layers/office/types'
+  import { TaskStageEnum } from '~~/layers/domain/task/enums/TaskStageEnum'
+  import type { Task } from '~~/layers/office/types'
 
   /*********************************************
    * 📂 Category: Interface

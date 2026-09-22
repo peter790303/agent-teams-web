@@ -2,9 +2,9 @@
  * 📂 Category: Imports
  * 🔧 Defines: 引入必要的模組和庫
  *********************************************/
-import { request } from '~/layers/base/repositories/http'
-import { useTaskAssemblers } from '~/layers/domain/task/assemblers/taskAssemblers'
-import { useTaskStateAssemblers } from '~/layers/domain/task/assemblers/taskStateAssemblers'
+import { request } from '~~/layers/base/repositories/http'
+import { useTaskAssemblers } from '~~/layers/domain/task/assemblers/taskAssemblers'
+import { useTaskStateAssemblers } from '~~/layers/domain/task/assemblers/taskStateAssemblers'
 import type {
   Task,
   TaskState,
@@ -14,7 +14,7 @@ import type {
   CreateTaskPayload,
   ResumeTaskPayload,
   SubmitTaskPayload,
-} from '~/layers/office/types/api'
+} from '~~/layers/office/types/api'
 
 /*********************************************
  * 📂 Category: Interface
@@ -88,7 +88,7 @@ export const resumeTask = ({
   worktree,
   failedReviewRounds,
   extraReviewRoundAllowance,
-}: ResumeTaskInput): Promise<RepositoryResult<import('~/layers/domain/task/TaskState').TaskAction>> => {
+}: ResumeTaskInput): Promise<RepositoryResult<import('~~/layers/domain/task/TaskState').TaskAction>> => {
   const payload: ResumeTaskPayload = { instruction, worktree, failedReviewRounds, extraReviewRoundAllowance }
 
   return result(
@@ -104,7 +104,7 @@ export const submitTask = ({
   commit,
   gate,
   idempotencyKey,
-}: SubmitTaskInput): Promise<RepositoryResult<import('~/layers/domain/task/TaskState').TaskAction>> => {
+}: SubmitTaskInput): Promise<RepositoryResult<import('~~/layers/domain/task/TaskState').TaskAction>> => {
   const payload: SubmitTaskPayload = { worktree, commit, gate, idempotencyKey }
 
   return result(

@@ -4,15 +4,15 @@
  *********************************************/
 import type { Ref } from 'vue'
 
-import type { Model as ModelCandidate } from '~/layers/domain/model/Model'
+import type { Model as ModelCandidate } from '~~/layers/domain/model/Model'
 import type {
   Capacity,
   HealthEntry,
   ModelCatalog,
   Policy,
   PolicyData,
-} from '~/layers/domain/model-settings/ModelSettings'
-import type { Role } from '~/layers/domain/types'
+} from '~~/layers/domain/model-settings/ModelSettings'
+import type { Role } from '~~/layers/domain/types'
 
 /*********************************************
  * 📂 Category: Imports
@@ -35,8 +35,8 @@ export interface PolicyEditor {
 
 export interface ModelSettingsComposable {
   editors: Ref<PolicyEditor[]>
-  capacities: Ref<import('~/layers/domain/model-settings/ModelSettings').Capacity[]>
-  health: Ref<import('~/layers/domain/model-settings/ModelSettings').HealthEntry[]>
+  capacities: Ref<import('~~/layers/domain/model-settings/ModelSettings').Capacity[]>
+  health: Ref<import('~~/layers/domain/model-settings/ModelSettings').HealthEntry[]>
   catalog: Ref<ModelCatalog[]>
   catalogState: Ref<'pending' | 'loaded' | 'failed'>
   catalogError: Ref<string>

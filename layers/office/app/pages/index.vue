@@ -5,13 +5,13 @@
    *********************************************/
   import { useDisplay } from 'vuetify'
 
-  import { roles } from '~/layers/office/assets/originalOffice'
-  import CommandCenter from '~/layers/office/components/office/CommandCenter.vue'
-  import PixelOfficeMap from '~/layers/office/components/office/PixelOfficeMap.vue'
-  import WorkstationRoster from '~/layers/office/components/office/WorkstationRoster.vue'
-  import { useOffice } from '~/layers/office/composables/useOffice'
-  import type { ActivityItem, Execution } from '~/layers/office/types'
-  import { getRoleStatusInfo } from '~/layers/office/utils/dispatchStatus'
+  import { roles } from '~~/layers/office/app/assets/originalOffice'
+  import CommandCenter from '~~/layers/office/app/components/office/CommandCenter.vue'
+  import PixelOfficeMap from '~~/layers/office/app/components/office/PixelOfficeMap.vue'
+  import WorkstationRoster from '~~/layers/office/app/components/office/WorkstationRoster.vue'
+  import { useOffice } from '~~/layers/office/app/composables/useOffice'
+  import type { ActivityItem, Execution } from '~~/layers/office/types'
+  import { getRoleStatusInfo } from '~~/layers/office/utils/dispatchStatus'
 
   /*********************************************
    * 📂 Category: Page Meta  (Nuxt only)

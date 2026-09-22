@@ -3,3 +3,11 @@ node_modules
 .output
 .git
 .env*
+.claude-flow
+.claude
+.scratch
+.swarm
+ruvector.db*
+coverage
+*.log
+.DS_Store

@@ -3,16 +3,16 @@
  * 🔧 Defines: 引入必要的模組和庫
  *********************************************/
 
-import { request } from '~/layers/base/repositories/http'
-import type { Model as ModelCandidate } from '~/layers/domain/model/Model'
-import { useModelSettingsAssemblers } from '~/layers/domain/model-settings/assemblers/modelSettingsAssemblers'
+import { request } from '~~/layers/base/repositories/http'
+import type { Model as ModelCandidate } from '~~/layers/domain/model/Model'
+import { useModelSettingsAssemblers } from '~~/layers/domain/model-settings/assemblers/modelSettingsAssemblers'
 import type {
   CapacityResource,
   HealthResource,
   ModelCatalogResource,
   PolicyResource,
-} from '~/layers/domain/model-settings/resources'
-import { MODEL_ROLES, type Role } from '~/layers/domain/types'
+} from '~~/layers/domain/model-settings/resources'
+import { MODEL_ROLES, type Role } from '~~/layers/domain/types'
 
 import type { Capacity, HealthEntry, ModelCatalog, Policy } from '../types'
 import { useModelSettingsMappers } from '../utils/modelSettingsMappers'

@@ -3,9 +3,9 @@
  * 🔧 Defines: 引入模型設定流程所需模組
  *********************************************/
 
-import { MODEL_ROLES } from '~/layers/domain/types'
+import { MODEL_ROLES } from '~~/layers/domain/types'
 
-import { getCapacities, getCatalog, getHealth, getPolicy, savePolicy } from '../repositories'
+import { getCapacities, getCatalog, getHealth, getPolicy, savePolicy } from '../../repositories'
 import type {
   Capacity,
   HealthEntry,
@@ -14,7 +14,7 @@ import type {
   ModelCandidate,
   PolicyEditor,
   Role,
-} from '../types'
+} from '../../types'
 
 /*********************************************
  * 📂 Category: Static Data
