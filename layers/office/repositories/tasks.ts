@@ -65,6 +65,8 @@ export const listTasks = (): Promise<RepositoryResult<Task[]>> =>
       (response.data ?? []).map((task) => toTask(task as Record<string, unknown>)),
     ),
   )
+export const deleteTask = ({ id }: TaskIdInput): Promise<RepositoryResult<boolean>> =>
+  result(request<unknown>(`/tasks/${encodeURIComponent(id)}`, { method: 'DELETE' }).then(() => true))
 export const createTask = ({ purpose, projectId }: CreateTaskInput): Promise<RepositoryResult<Task>> => {
   const payload: CreateTaskPayload = { purpose, projectId }
 

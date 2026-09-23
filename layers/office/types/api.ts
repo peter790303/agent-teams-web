@@ -68,8 +68,10 @@ export interface OfficeComposable {
   taskStates: Ref<TaskState[]>
   roleStatuses: ComputedRef<Record<string, DispatchStatus>>
   error: Ref<string | null>
+  deletingTaskIds: Ref<string[]>
   load: () => Promise<void>
   create: (purpose: string, projectId: string) => Promise<void>
+  deleteTask: (id: string) => Promise<void>
   getState: (id: string) => Promise<TaskState>
   getIntervention: (id: string) => Promise<{ data: Intervention | null }>
   resumeTask: (command: ResumeTaskCommand) => Promise<void>

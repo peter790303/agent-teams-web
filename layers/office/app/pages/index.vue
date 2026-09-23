@@ -7,6 +7,7 @@
 
   import { roles } from '~~/layers/office/app/assets/originalOffice'
   import CommandCenter from '~~/layers/office/app/components/office/CommandCenter.vue'
+  import LlmServicePanel from '~~/layers/office/app/components/office/LlmServicePanel.vue'
   import PixelOfficeMap from '~~/layers/office/app/components/office/PixelOfficeMap.vue'
   import WorkstationRoster from '~~/layers/office/app/components/office/WorkstationRoster.vue'
   import { useOffice } from '~~/layers/office/app/composables/useOffice'
@@ -23,7 +24,8 @@
    * 📂 Category: Composables / Plugins
    * 🔧 Defines: 自定 composables、Pinia 狀態、i18n、plugin 等注入來源
    *********************************************/
-  const { tasks, taskLoadStatus, taskStates, roleStatuses, error, load, create } = useOffice()
+  const { tasks, taskLoadStatus, taskStates, roleStatuses, error, deletingTaskIds, load, create, deleteTask } =
+    useOffice()
   const { mdAndDown } = useDisplay()
 
   /*********************************************
@@ -120,6 +122,13 @@
       // useOffice stores the API error for the alert below.
     }
   }
+  const removeTask = async (id: string): Promise<void> => {
+    try {
+      await deleteTask(id)
+    } catch {
+      // The shared Office error state displays the API's actual failure.
+    }
+  }
   const openRole = (id: string): void => {
     selectedRoleId.value = id
   }
@@ -184,7 +193,12 @@
             :activities="activities"
             :resources="resources"
             :task-load-status="taskLoadStatus"
+            :deleting-task-ids="deletingTaskIds"
+            @delete-task="removeTask"
         /></v-col>
+      </v-row>
+      <v-row>
+        <v-col cols="12"><LlmServicePanel /></v-col>
       </v-row>
       <v-row>
         <v-col cols="12">

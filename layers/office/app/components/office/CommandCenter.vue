@@ -30,6 +30,7 @@
     purpose: string
     project: string
     stage: string
+    canDelete: boolean
     href: string
   }
   const stageLabels: Record<string, string> = {
@@ -63,6 +64,7 @@
     activities: ActivityItem[]
     resources: ResourceItem[]
     taskLoadStatus: 'idle' | 'loading' | 'success' | 'error'
+    deletingTaskIds: string[]
   }>()
 
   /*********************************************
@@ -70,6 +72,8 @@
    * 🔧 Defines: 目前指揮中心分頁
    *********************************************/
   const tab = ref<'overview' | 'tasks' | 'activity' | 'settings'>('overview')
+  const deleteTarget = ref<TaskPresentation | null>(null)
+  const emit = defineEmits<{ deleteTask: [id: string] }>()
 
   /*********************************************
    * 📂 Category: Computed
@@ -126,6 +130,7 @@
       purpose: task.purpose,
       project: '',
       stage: stageLabel(task.stage),
+      canDelete: task.stage === TaskStageEnum.COMPLETED || task.stage === TaskStageEnum.CANCELLED,
       href: `/office/tasks/${task.id}`,
     })),
   )
@@ -135,12 +140,26 @@
       purpose: task.purpose,
       project: task.projectId,
       stage: stageLabel(task.stage),
+      canDelete: task.stage === TaskStageEnum.COMPLETED || task.stage === TaskStageEnum.CANCELLED,
       href: `/office/tasks/${task.id}`,
     })),
   )
   const showEmptyFeed = computed<boolean>(() => feed.value.length === 0)
   const showEmptyPendingTasks = computed<boolean>(() => pendingTaskLinks.value.length === 0)
   const showEmptyTasks = computed<boolean>(() => taskLinks.value.length === 0)
+  const confirmDelete = (): void => {
+    if (deleteTarget.value === null || props.deletingTaskIds.includes(deleteTarget.value.id)) return
+    emit('deleteTask', deleteTarget.value.id)
+  }
+  const isDeleting = computed(
+    () => deleteTarget.value !== null && props.deletingTaskIds.includes(deleteTarget.value.id),
+  )
+  watch(
+    () => props.tasks,
+    (tasks) => {
+      if (deleteTarget.value && !tasks.some((task) => task.id === deleteTarget.value?.id)) deleteTarget.value = null
+    },
+  )
   const statsLabel = computed<string | null>(() => {
     if (props.taskLoadStatus === 'success') return null
     if (props.taskLoadStatus === 'loading' || props.taskLoadStatus === 'idle') return '載入中…'
@@ -271,16 +290,38 @@
         >
       </div>
       <div class="task-list d-flex flex-column ga-1 mt-1">
-        <NuxtLink
-          v-for="task in taskLinks"
-          :key="task.id"
-          class="task-item d-flex flex-column pa-2 bg-taskSurface text-caption"
-          :to="task.href"
-          ><strong>{{ task.purpose }}</strong
-          ><small>{{ task.project }} · {{ task.stage }}</small></NuxtLink
-        >
+        <div v-for="task in taskLinks" :key="task.id" class="task-item d-flex align-center ga-2 pa-2 bg-taskSurface">
+          <NuxtLink class="flex-grow-1 text-caption" :to="task.href"
+            ><strong>{{ task.purpose }}</strong
+            ><small class="d-block">{{ task.project }} · {{ task.stage }}</small></NuxtLink
+          >
+          <v-btn
+            icon="mdi-delete-outline"
+            size="small"
+            variant="text"
+            :aria-label="`刪除任務 ${task.purpose}`"
+            :disabled="!task.canDelete"
+            :title="task.canDelete ? '刪除任務' : '進行中的任務無法刪除'"
+            @click="deleteTarget = task"
+          />
+        </div>
         <div v-if="showEmptyTasks" class="empty py-1 text-caption text-textMuted">目前沒有任務</div>
       </div>
     </section>
+    <v-dialog
+      :model-value="deleteTarget !== null"
+      max-width="420"
+      @update:model-value="!$event && !isDeleting && (deleteTarget = null)"
+    >
+      <v-card v-if="deleteTarget">
+        <v-card-title>刪除任務？</v-card-title>
+        <v-card-text>將刪除「{{ deleteTarget.purpose }}」。此操作會從任務清單移除該終止任務。</v-card-text>
+        <v-card-actions>
+          <v-spacer />
+          <v-btn variant="text" :disabled="isDeleting" @click="deleteTarget = null">取消</v-btn>
+          <v-btn color="error" :loading="isDeleting" :disabled="isDeleting" @click="confirmDelete">刪除</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
   </aside>
 </template>

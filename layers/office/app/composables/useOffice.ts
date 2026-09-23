@@ -7,6 +7,7 @@ import { isTaskStage, TaskStageEnum } from '~~/layers/domain/task/enums/TaskStag
 import type { DispatchStatus } from '~~/layers/domain/task/types/DispatchStatus'
 import {
   createTask,
+  deleteTask,
   getIntervention,
   getTaskState,
   listTasks,
@@ -32,6 +33,7 @@ export const useOffice = (): OfficeComposable => {
   const taskLoadStatus = useState<OfficeLoadStatusEnum>('tasks-load-status', () => OfficeLoadStatusEnum.IDLE)
   const taskStates = useState<TaskState[]>('task-states', () => [])
   const error = useState<string | null>('tasks-error', () => null)
+  const deletingTaskIds = ref<string[]>([])
 
   /*********************************************
    * 📂 Category: Computed
@@ -122,6 +124,22 @@ export const useOffice = (): OfficeComposable => {
     }
     setError('建立任務失敗')
   }
+  const remove = async (id: string): Promise<void> => {
+    if (deletingTaskIds.value.includes(id)) return
+    deletingTaskIds.value = [...deletingTaskIds.value, id]
+    try {
+      const result = await deleteTask({ id })
+      if (result.error) {
+        setError(result.error)
+        throw new Error(result.error)
+      }
+      tasks.value = tasks.value.filter((task) => task.id !== id)
+      taskStates.value = taskStates.value.filter((state) => state.data.task.id !== id)
+      setError(null)
+    } finally {
+      deletingTaskIds.value = deletingTaskIds.value.filter((deletingId) => deletingId !== id)
+    }
+  }
   const getState = async (id: string): Promise<TaskState> => {
     const result = await getTaskState({ id })
     if (result.error) {
@@ -171,8 +189,10 @@ export const useOffice = (): OfficeComposable => {
     taskStates,
     roleStatuses,
     error,
+    deletingTaskIds,
     load,
     create,
+    deleteTask: remove,
     getState,
     getIntervention: intervention,
     resumeTask: resumeWithReviewContext,
