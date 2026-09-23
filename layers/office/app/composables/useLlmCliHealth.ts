@@ -35,7 +35,7 @@ export const useLlmCliHealth = (): LlmCliHealthState => {
         inventoryError.value = ''
       } catch {
         providers.value = []
-        inventoryError.value = '無法取得模型服務清單。'
+        inventoryError.value = '無法取得 LLM 服務清單。'
       } finally {
         inventoryLoadInFlight = null
       }
@@ -47,13 +47,10 @@ export const useLlmCliHealth = (): LlmCliHealthState => {
   const checkProvider = (provider: LlmCliProvider): Promise<void> => {
     const current = checksInFlight.get(provider.id)
     if (current) return current
-    const modelId = provider.modelId
-    if (!modelId) return Promise.resolve()
-
     provider.status = 'checking'
     const operation = (async () => {
       try {
-        const response = await checkLlmCliProvider(provider.id, modelId)
+        const response = await checkLlmCliProvider(provider.id)
         provider.result = response.data
         provider.status = response.data.available ? 'connected' : 'unavailable'
       } catch {
