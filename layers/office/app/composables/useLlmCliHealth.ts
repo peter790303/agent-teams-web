@@ -1,50 +1,41 @@
-import { getCatalog } from '~~/layers/model-settings/repositories'
-import { checkLlmCliHealth, type LlmCliHealthResponse } from '~~/layers/office/repositories'
-type ProviderInventoryItem = { id: string; name: string; models: string[] }
+import {
+  checkLlmCliProvider,
+  getLlmCliProviderInventory,
+  type LlmCliProviderInventory,
+} from '~~/layers/office/application/usecases/llm-cli-health'
+import type { LlmCliCheckResult } from '~~/layers/office/repositories'
+
+export type LlmCliProviderStatus = 'unknown' | 'checking' | 'connected' | 'unavailable'
+export type LlmCliProvider = LlmCliProviderInventory & {
+  status: LlmCliProviderStatus
+  result?: LlmCliCheckResult
+}
 
 type LlmCliHealthState = {
-  status: Ref<string | 'unchecked' | 'checking'>
-  checkedAt: Ref<string | null>
-  providers: Ref<LlmCliHealthResponse['providers']>
-  inventory: Ref<ProviderInventoryItem[]>
+  providers: Ref<LlmCliProvider[]>
   inventoryError: Ref<string>
-  message: Ref<string>
-  check: () => Promise<void>
+  checking: Ref<boolean>
+  check: (providerId?: string) => Promise<void>
   loadInventory: () => Promise<void>
 }
 
 export const useLlmCliHealth = (): LlmCliHealthState => {
-  const status = ref<string | 'unchecked' | 'checking'>('unchecked')
-  const checkedAt = ref<string | null>(null)
-  const providers = ref<LlmCliHealthResponse['providers']>([])
-  const inventory = ref<ProviderInventoryItem[]>([])
+  const providers = ref<LlmCliProvider[]>([])
   const inventoryError = ref('')
-  const message = ref('尚未檢查 CLI 連線。')
-  let checkInFlight: Promise<LlmCliHealthResponse> | null = null
+  const checking = ref(false)
   let inventoryLoadInFlight: Promise<void> | null = null
+  const checksInFlight = new Map<string, Promise<void>>()
 
   const loadInventory = async (): Promise<void> => {
     if (inventoryLoadInFlight) return inventoryLoadInFlight
     inventoryLoadInFlight = (async () => {
       try {
-        const catalog = await getCatalog()
-        const grouped = new Map<string, Set<string>>()
-        for (const entry of catalog) {
-          if (!entry.providerId) continue
-          const models = grouped.get(entry.providerId) ?? new Set<string>()
-          if (entry.modelId) models.add(entry.modelId)
-          grouped.set(entry.providerId, models)
-        }
-        const labels: Record<string, string> = { anthropic: 'Anthropic', openai: 'OpenAI', agy: 'agy', xai: 'xAI' }
-        inventory.value = [...grouped].map(([id, models]) => ({
-          id,
-          name: labels[id.toLowerCase()] ?? id,
-          models: [...models],
-        }))
+        const inventory = await getLlmCliProviderInventory()
+        providers.value = inventory.map((provider) => ({ ...provider, status: 'unknown' }))
         inventoryError.value = ''
-      } catch (error) {
-        inventory.value = []
-        inventoryError.value = error instanceof Error ? error.message : '無法取得模型服務清單。'
+      } catch {
+        providers.value = []
+        inventoryError.value = '無法取得模型服務清單。'
       } finally {
         inventoryLoadInFlight = null
       }
@@ -53,27 +44,42 @@ export const useLlmCliHealth = (): LlmCliHealthState => {
     return inventoryLoadInFlight
   }
 
-  const check = async (): Promise<void> => {
-    if (checkInFlight) return
+  const checkProvider = (provider: LlmCliProvider): Promise<void> => {
+    const current = checksInFlight.get(provider.id)
+    if (current) return current
+    const modelId = provider.modelId
+    if (!modelId) return Promise.resolve()
 
-    status.value = 'checking'
-    message.value = '正在送出不含專案資料的最小 CLI 請求…'
-    checkInFlight = checkLlmCliHealth()
+    provider.status = 'checking'
+    const operation = (async () => {
+      try {
+        const response = await checkLlmCliProvider(provider.id, modelId)
+        provider.result = response.data
+        provider.status = response.data.available ? 'connected' : 'unavailable'
+      } catch {
+        provider.result = undefined
+        provider.status = 'unknown'
+      } finally {
+        checksInFlight.delete(provider.id)
+      }
+    })()
+
+    checksInFlight.set(provider.id, operation)
+
+    return operation
+  }
+
+  const check = async (providerId?: string): Promise<void> => {
+    await loadInventory()
+    const targets = providerId ? providers.value.filter((provider) => provider.id === providerId) : providers.value
+    if (!targets.length) return
+    checking.value = true
     try {
-      const result = await checkInFlight
-      status.value = result.status
-      checkedAt.value = result.checkedAt
-      message.value = result.message
-      providers.value = result.providers
-    } catch (error) {
-      status.value = 'unavailable'
-      checkedAt.value = new Date().toISOString()
-      providers.value = []
-      message.value = error instanceof Error ? error.message : 'CLI 連線檢查失敗。'
+      await Promise.all(targets.map(checkProvider))
     } finally {
-      checkInFlight = null
+      checking.value = providers.value.some((provider) => provider.status === 'checking')
     }
   }
 
-  return { status, checkedAt, providers, inventory, inventoryError, message, check, loadInventory }
+  return { providers, inventoryError, checking, check, loadInventory }
 }
